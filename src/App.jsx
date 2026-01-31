@@ -8,7 +8,7 @@ import { parseEther } from 'viem';
 import '@rainbow-me/rainbowkit/styles.css';
 import './App.css';
 
-// Assets
+// Importação de Assets
 import fundoImg from './assets/fundo.jpg';
 import logoImg from './assets/logo.png';
 import animationGif from './assets/animation.gif'; 
@@ -28,23 +28,24 @@ const config = getDefaultConfig({
 
 const queryClient = new QueryClient();
 
-// Lista completa para preencher a barra superior (conforme suas fotos)
+// Lista expandida para preencher o espaço do cabeçalho
 const ASSETS = [
   { symbol: 'ANKR', id: 'ankr', pair: 'BINANCE:ANKRUSDT' },
   { symbol: 'BTC', id: 'bitcoin', pair: 'BITSTAMP:BTCUSD' },
   { symbol: 'ETH', id: 'ethereum', pair: 'BITSTAMP:ETHUSD' },
   { symbol: 'SOL', id: 'solana', pair: 'BINANCE:SOLUSDT' },
-  { symbol: 'HYPE', id: 'hyperliquid', pair: 'BYBIT:HYPEUSDT' },
-  { symbol: 'AVAX', id: 'avalanche-2', pair: 'BINANCE:AVAXUSDT' },
-  { symbol: 'SUI', id: 'sui', pair: 'BINANCE:SUIUSDT' },
-  { symbol: 'JUP', id: 'jupiter-exchange-solana', pair: 'BINANCE:JUPUSDT' },
-  { symbol: 'XLM', id: 'stellar', pair: 'BINANCE:XLMUSDT' },
-  { symbol: 'DOT', id: 'polkadot', pair: 'BINANCE:DOTUSDT' },
   { symbol: 'BNB', id: 'binancecoin', pair: 'BINANCE:BNBUSDT' },
   { symbol: 'XRP', id: 'ripple', pair: 'BINANCE:XRPUSDT' },
   { symbol: 'ADA', id: 'cardano', pair: 'BINANCE:ADAUSDT' },
+  { symbol: 'USDC', id: 'usd-coin', pair: 'BINANCE:USDCUSDT' },
   { symbol: 'TRX', id: 'tron', pair: 'BINANCE:TRXUSDT' },
+  { symbol: 'SUI', id: 'sui', pair: 'BINANCE:SUIUSDT' },
   { symbol: 'POL', id: 'matic-network', pair: 'BINANCE:POLUSDT' },
+  { symbol: 'HYPE', id: 'hyperliquid', pair: 'BYBIT:HYPEUSDT' },
+  { symbol: 'XLM', id: 'stellar', pair: 'BINANCE:XLMUSDT' },
+  { symbol: 'AVAX', id: 'avalanche-2', pair: 'BINANCE:AVAXUSDT' },
+  { symbol: 'DOT', id: 'polkadot', pair: 'BINANCE:DOTUSDT' },
+  { symbol: 'JUP', id: 'jupiter-exchange-solana', pair: 'BINANCE:JUPUSDT' },
   { symbol: 'IMX', id: 'immutable-x', pair: 'BINANCE:IMXUSDT' }
 ];
 
@@ -60,7 +61,7 @@ function WalletInterface() {
     const fetchPrices = async () => {
       try {
         const ids = ASSETS.map(a => a.id).join(',');
-        const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
+        const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
         setPrices(res.data);
       } catch (e) { console.error(e); }
     };
@@ -69,58 +70,106 @@ function WalletInterface() {
   }, []);
 
   return (
-    <div className="terminal-wrapper" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url(${fundoImg})`}}>
-      <div className="crt-lines"></div>
+    <div className="terminal-v1-1" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.9)), url(${fundoImg})`}}>
+      <div className="crt-effect"></div>
       
-      <nav className="header-nav">
-        <div className="logo-wrap"><img src={logoImg} alt="logo" /></div>
-        <div className="title-glow">NEURA PRO TERMINAL v1.1</div>
-        <div className="wallet-wrap"><ConnectButton label="CONNECT" /></div>
-      </nav>
+      <header className="main-nav">
+        <div className="brand"><img src={logoImg} alt="logo" /></div>
+        <div className="terminal-id">NEURA PRO TERMINAL v1.1</div>
+        <div className="auth-area"><ConnectButton label="CONNECT" /></div>
+      </header>
 
-      <div className="main-layout">
-        {/* LADO ESQUERDO */}
-        <aside className="column-side">
-          <section className="glass-box swap-container">
-            <h2 className="box-label">SWAP ENGINE</h2>
-            <div className="swap-fields">
-              <div className="field-group">
+      <main className="dashboard-grid">
+        {/* COLUNA ESQUERDA: SWAP E TRANSFER */}
+        <aside className="panel-side">
+          <section className="glass-panel swap-engine">
+            <h2 className="label-tag">SWAP ENGINE</h2>
+            <div className="swap-logic">
+              <div className="input-box">
                 <label>ORIGIN</label>
-                <select className="ui-input-dark"><option>ANKR</option></select>
-                <input type="number" className="ui-input-dark" placeholder="0.00" value={swapAmount} onChange={e => setSwapAmount(e.target.value)} />
+                <select className="ui-select"><option>ANKR</option></select>
+                <input type="number" className="ui-num" placeholder="0.00" value={swapAmount} onChange={e => setSwapAmount(e.target.value)} />
               </div>
-              <div className="swap-divider">⇅</div>
-              <div className="field-group">
+              <div className="ui-arrow">⇅</div>
+              <div className="input-box">
                 <label>DESTINATION</label>
-                <select className="ui-input-dark"><option>BTC</option></select>
-                <div className="ui-result-box">{swapAmount ? (swapAmount * 0.00000004).toFixed(8) : "0.00000000"}</div>
+                <select className="ui-select"><option>BTC</option></select>
+                <div className="ui-readonly">{swapAmount ? (swapAmount * 0.00000004).toFixed(8) : "0.00000000"}</div>
               </div>
-              <button className="neon-btn-action">EXECUTE SWAP</button>
+              <button className="ui-btn neon-fill">EXECUTE SWAP</button>
             </div>
           </section>
 
-          <section className="glass-box">
-            <h2 className="box-label">TRANSFER</h2>
-            <input className="ui-input-dark" placeholder="Amount..." />
-            <input className="ui-input-dark" placeholder="Recipient 0x..." />
-            <button className="neon-btn-action">SEND ASSETS</button>
+          <section className="glass-panel">
+            <h2 className="label-tag">TRANSFER</h2>
+            <input className="ui-num" placeholder="Qty..." />
+            <input className="ui-num" placeholder="Recipient 0x..." />
+            <button className="ui-btn">SEND ASSETS</button>
           </section>
         </aside>
 
-        {/* CENTRO (GRÁFICO) */}
-        <main className="column-center">
-          <div className="top-asset-bar">
+        {/* CENTRO: CABEÇALHO DE ATIVOS E GRÁFICO */}
+        <section className="panel-center">
+          <div className="asset-header-grid">
             {ASSETS.map(a => (
-              <button key={a.symbol} onClick={() => setChartSymbol(a.pair)} className={chartSymbol === a.pair ? 'tab-item active' : 'tab-item'}>
+              <button 
+                key={a.symbol} 
+                onClick={() => setChartSymbol(a.pair)} 
+                className={chartSymbol === a.pair ? 'asset-card active' : 'asset-card'}
+              >
                 {a.symbol}
               </button>
             ))}
           </div>
-          <div className="glass-box chart-area">
-            <iframe src={`https://s.tradingview.com/widgetembed/?symbol=${chartSymbol}&interval=D&theme=dark`} width="100%" height="100%" frameBorder="0" title="main-chart"></iframe>
+          <div className="glass-panel chart-box">
+            <iframe src={`https://s.tradingview.com/widgetembed/?symbol=${chartSymbol}&interval=D&theme=dark`} width="100%" height="100%" frameBorder="0" title="tv"></iframe>
           </div>
-        </main>
+        </section>
 
-        {/* LADO DIREITO */}
-        <aside className="column-side">
-          <section className="glass-box">
+        {/* COLUNA DIREITA: INFO E MONITOR */}
+        <aside className="panel-side">
+          <section className="glass-panel">
+            <h2 className="label-tag">WALLET INFO</h2>
+            <div className="wallet-data">
+              <div className="text-small">{isConnected ? address : 'NOT CONNECTED'}</div>
+              <div className="text-neon">ANKR: 1,250.00</div>
+            </div>
+          </section>
+
+          <section className="glass-panel flex-grow">
+            <h2 className="label-tag">COLLECTIONS</h2>
+            <div className="centered-msg">NO NFTS FOUND</div>
+          </section>
+
+          <section className="glass-panel">
+            <h2 className="label-tag">SYS MONITOR</h2>
+            <img src={animationGif} alt="sys" className="sys-gif" />
+            <div className="sys-clock">TIME: {time}</div>
+          </section>
+        </aside>
+      </main>
+
+      <footer className="footer-bar">
+        <div className="ticker-wrap">
+          {[...ASSETS, ...ASSETS].map((a, i) => (
+            <div key={i} className="ticker-item">
+              {a.symbol}: <span className="neon-text">${prices[a.id]?.usd?.toFixed(2) || '0.00'}</span>
+            </div>
+          ))}
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider theme={darkTheme({ accentColor: '#adff2f' })}>
+          <WalletInterface />
+        </RainbowKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
+}
