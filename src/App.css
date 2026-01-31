@@ -62,6 +62,48 @@ body, html {
   min-width: 0;
 }
 
+/* NOVO SELETOR DE ATIVOS (DROPDOWN) */
+.asset-selector-bar {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px;
+  background: var(--glass-bg);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+
+.selector-label {
+  font-size: 0.7rem;
+  color: var(--neon);
+  font-weight: bold;
+}
+
+.asset-dropdown {
+  background: #000;
+  color: var(--neon);
+  border: 1px solid var(--neon);
+  padding: 5px 15px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  cursor: pointer;
+  outline: none;
+  min-width: 200px;
+}
+
+.asset-dropdown option {
+  background: #050505;
+  color: #fff;
+}
+
+.selected-info {
+  font-size: 0.7rem;
+  color: #888;
+}
+
+/* CHART BOX */
+.chart-box { flex: 1; background: #000; overflow: hidden; padding: 0 !important; }
+
 /* GLASS PANELS */
 .glass-panel {
   background: var(--glass-bg);
@@ -77,38 +119,6 @@ body, html {
   border-bottom: 1px solid var(--border);
   padding-bottom: 4px;
 }
-
-/* ASSET HEADER (Preenchimento do espaço da seta) */
-.asset-header-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  width: 100%;
-}
-
-.asset-card {
-  flex: 1;
-  min-width: 75px;
-  max-width: 100px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border);
-  color: #888;
-  padding: 8px 2px;
-  font-size: 0.65rem;
-  cursor: pointer;
-  text-align: center;
-  transition: 0.2s;
-}
-
-.asset-card.active {
-  background: var(--neon);
-  color: #000;
-  font-weight: bold;
-  box-shadow: 0 0 10px var(--neon);
-}
-
-/* CHART */
-.chart-box { flex: 1; background: #000; overflow: hidden; }
 
 /* SWAP UI */
 .ui-select, .ui-num {
