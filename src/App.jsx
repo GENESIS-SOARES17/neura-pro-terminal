@@ -28,7 +28,6 @@ const config = getDefaultConfig({
 
 const queryClient = new QueryClient();
 
-// LISTA DE ATIVOS ATUALIZADA COM OS 5 NOVOS
 const ASSETS = [
   { symbol: 'ANKR', id: 'ankr', pair: 'BINANCE:ANKRUSDT' },
   { symbol: 'BTC', id: 'bitcoin', pair: 'BITSTAMP:BTCUSD' },
@@ -80,6 +79,10 @@ function WalletInterface() {
 
   return (
     <div className="layout-personalizado" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${fundoImg})`}}>
+      
+      {/* Camada do Efeito CRT */}
+      <div className="crt-overlay"></div>
+
       <nav className="navbar">
         <img src={logoImg} className="minha-logo" alt="logo" />
         <div className="terminal-id">NEURA PRO TERMINAL v1.0</div>
@@ -88,7 +91,7 @@ function WalletInterface() {
 
       <div className="main-grid-layout">
         <div className="grid-item side-col">
-          <div className="glass-panel ultra-transp compact">
+          <div className="glass-panel compact">
             <h2 className="rect-title">SWAP ENGINE</h2>
             <div className="box-section">
               <label className="bright-label">ORIGIN</label>
@@ -101,7 +104,7 @@ function WalletInterface() {
             </div>
           </div>
 
-          <div className="glass-panel ultra-transp compact" style={{marginTop: '10px'}}>
+          <div className="glass-panel compact">
             <h2 className="rect-title">TRANSFER</h2>
             <div className="box-section">
               <input type="number" className="input-field-transp" placeholder="Qty..." onChange={e => setTransfQty(e.target.value)} />
@@ -118,21 +121,20 @@ function WalletInterface() {
 
         <div className="grid-item center-panel">
           <div className="chart-selector-grid">
-            {/* MOSTRANDO OS 12 PRIMEIROS ATIVOS (INCLUINDO OS NOVOS) */}
             {ASSETS.slice(0, 12).map(a => (
               <button key={a.symbol} onClick={() => setChartSymbol(a.pair)} className={chartSymbol === a.pair ? 'btn-chart-active' : 'btn-chart-normal'}>
                 {a.symbol}
               </button>
             ))}
           </div>
-          <div className="glass-panel chart-wrapper ultra-transp">
+          <div className="glass-panel chart-wrapper">
             <iframe src={`https://s.tradingview.com/widgetembed/?symbol=${chartSymbol}&interval=D&theme=dark`} width="100%" height="100%" frameBorder="0" className="graph-iframe" title="chart"></iframe>
           </div>
           <h1 className="main-title">NEURA PRO TERMINAL</h1>
         </div>
 
         <div className="grid-item side-col">
-          <div className="glass-panel ultra-transp compact">
+          <div className="glass-panel compact">
             <h2 className="rect-title">WALLET INFO</h2>
             <div className="wallet-info-hub">
               <div className="addr-txt">{isConnected ? `${address.slice(0,10)}...${address.slice(-6)}` : 'NOT CONNECTED'}</div>
@@ -140,12 +142,12 @@ function WalletInterface() {
             </div>
           </div>
 
-          <div className="glass-panel ultra-transp compact" style={{marginTop: '10px'}}>
+          <div className="glass-panel compact">
             <h2 className="rect-title">COLLECTIONS</h2>
             <div className="nft-grid-placeholder">NO NFTS FOUND</div>
           </div>
 
-          <div className="glass-panel ultra-transp compact animation-box" style={{marginTop: '10px'}}>
+          <div className="glass-panel compact animation-box">
               <h2 className="rect-title">SYS MONITOR</h2>
               <img src={animationGif} alt="Animation" className="side-gif" />
               <div className="live-clock-terminal">SYS_TIME: {time}</div>
