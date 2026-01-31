@@ -8,7 +8,7 @@ import { parseEther } from 'viem';
 import '@rainbow-me/rainbowkit/styles.css';
 import './App.css';
 
-// IMPORTAÇÕES CORRIGIDAS (SEM ESPAÇOS)
+// Importações de assets
 import fundoImg from './assets/fundo.jpg';
 import logoImg from './assets/logo.png';
 import animationGif from './assets/animation.gif'; 
@@ -28,6 +28,7 @@ const config = getDefaultConfig({
 
 const queryClient = new QueryClient();
 
+// LISTA DE ATIVOS ATUALIZADA COM OS 5 NOVOS
 const ASSETS = [
   { symbol: 'ANKR', id: 'ankr', pair: 'BINANCE:ANKRUSDT' },
   { symbol: 'BTC', id: 'bitcoin', pair: 'BITSTAMP:BTCUSD' },
@@ -36,15 +37,15 @@ const ASSETS = [
   { symbol: 'BNB', id: 'binancecoin', pair: 'BINANCE:BNBUSDT' },
   { symbol: 'XRP', id: 'ripple', pair: 'BINANCE:XRPUSDT' },
   { symbol: 'ADA', id: 'cardano', pair: 'BINANCE:ADAUSDT' },
+  { symbol: 'USDC', id: 'usd-coin', pair: 'BINANCE:USDCUSDT' },
+  { symbol: 'TRX', id: 'tron', pair: 'BINANCE:TRXUSDT' },
+  { symbol: 'SUI', id: 'sui', pair: 'BINANCE:SUIUSDT' },
+  { symbol: 'POL', id: 'matic-network', pair: 'BINANCE:POLUSDT' },
+  { symbol: 'HYPE', id: 'hyperliquid', pair: 'BYBIT:HYPEUSDT' },
   { symbol: 'AVAX', id: 'avalanche-2', pair: 'BINANCE:AVAXUSDT' },
   { symbol: 'DOT', id: 'polkadot', pair: 'BINANCE:DOTUSDT' },
   { symbol: 'LINK', id: 'chainlink', pair: 'BINANCE:LINKUSDT' },
   { symbol: 'DOGE', id: 'dogecoin', pair: 'BINANCE:DOGEUSDT' },
-  { symbol: 'TRX', id: 'tron', pair: 'BINANCE:TRXUSDT' },
-  { symbol: 'POL', id: 'matic-network', pair: 'BINANCE:POLUSDT' },
-  { symbol: 'SUI', id: 'sui', pair: 'BINANCE:SUIUSDT' },
-  { symbol: 'SHIB', id: 'shiba-inu', pair: 'BINANCE:SHIBUSDT' },
-  { symbol: 'LTC', id: 'litecoin', pair: 'BINANCE:LTCUSDT' },
   { symbol: 'NEAR', id: 'near', pair: 'BINANCE:NEARUSDT' },
   { symbol: 'APT', id: 'aptos', pair: 'BINANCE:APTUSDT' },
   { symbol: 'UNI', id: 'uniswap', pair: 'BINANCE:UNIUSDT' },
@@ -117,7 +118,8 @@ function WalletInterface() {
 
         <div className="grid-item center-panel">
           <div className="chart-selector-grid">
-            {ASSETS.slice(0, 7).map(a => (
+            {/* MOSTRANDO OS 12 PRIMEIROS ATIVOS (INCLUINDO OS NOVOS) */}
+            {ASSETS.slice(0, 12).map(a => (
               <button key={a.symbol} onClick={() => setChartSymbol(a.pair)} className={chartSymbol === a.pair ? 'btn-chart-active' : 'btn-chart-normal'}>
                 {a.symbol}
               </button>
