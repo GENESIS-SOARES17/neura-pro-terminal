@@ -8,10 +8,10 @@ import { parseEther } from 'viem';
 import '@rainbow-me/rainbowkit/styles.css';
 import './App.css';
 
-// Importações corrigidas
+// IMPORTAÇÕES CORRIGIDAS (SEM ESPAÇOS)
 import fundoImg from './assets/fundo.jpg';
 import logoImg from './assets/logo.png';
-import animationGif from './assets/animation.gif'; // ESPAÇO REMOVIDO AQUI
+import animationGif from './assets/animation.gif'; 
 
 const neuraTestnet = {
   id: 267,
