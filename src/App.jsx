@@ -26,8 +26,11 @@ const config = getDefaultConfig({
 
 const queryClient = new QueryClient();
 
+// Lista de Ativos Atualizada com USDC e USDT
 const ASSETS_LIST = [
   { symbol: 'ANKR', id: 'ankr', pair: 'BINANCE:ANKRUSDT' },
+  { symbol: 'USDC', id: 'usd-coin', pair: 'BINANCE:USDCUSDT' },
+  { symbol: 'USDT', id: 'tether', pair: 'BINANCE:USDTUSDT' },
   { symbol: 'BTC', id: 'bitcoin', pair: 'BITSTAMP:BTCUSD' },
   { symbol: 'ETH', id: 'ethereum', pair: 'BITSTAMP:ETHUSD' },
   { symbol: 'SOL', id: 'solana', pair: 'BINANCE:SOLUSDT' },
@@ -40,9 +43,7 @@ const ASSETS_LIST = [
   { symbol: 'BNB', id: 'binancecoin', pair: 'BINANCE:BNBUSDT' },
   { symbol: 'XRP', id: 'ripple', pair: 'BINANCE:XRPUSDT' },
   { symbol: 'ADA', id: 'cardano', pair: 'BINANCE:ADAUSDT' },
-  { symbol: 'TRX', id: 'tron', pair: 'BINANCE:TRXUSDT' },
-  { symbol: 'POL', id: 'matic-network', pair: 'BINANCE:POLUSDT' },
-  { symbol: 'IMX', id: 'immutable-x', pair: 'BINANCE:IMXUSDT' }
+  { symbol: 'TRX', id: 'tron', pair: 'BINANCE:TRXUSDT' }
 ];
 
 function WalletInterface() {
@@ -51,9 +52,9 @@ function WalletInterface() {
   const [prices, setPrices] = useState({});
   const [time, setTime] = useState(new Date().toLocaleTimeString());
 
-  // Estados do Swap Dinâmico
-  const [swapOrigin, setSwapOrigin] = useState(ASSETS_LIST[0]); // Padrão ANKR
-  const [swapDest, setSwapDest] = useState(ASSETS_LIST[1]);   // Padrão BTC
+  // Estados do Swap
+  const [swapOrigin, setSwapOrigin] = useState(ASSETS_LIST[0]); 
+  const [swapDest, setSwapDest] = useState(ASSETS_LIST[1]); // Começa com USDC como destino
   const [swapAmount, setSwapAmount] = useState('');
 
   useEffect(() => {
@@ -66,16 +67,22 @@ function WalletInterface() {
       } catch (e) { console.error(e); }
     };
     fetchPrices();
-    const priceTimer = setInterval(fetchPrices, 30000); // Atualiza preços a cada 30s
+    const priceTimer = setInterval(fetchPrices, 30000);
     return () => { clearInterval(timer); clearInterval(priceTimer); };
   }, []);
 
-  // Cálculo de conversão em tempo real baseado nos preços da API
+  // Cálculo do valor em Dólar da entrada
+  const getInputValueInUSD = () => {
+    if (!swapAmount || !prices[swapOrigin.id]) return "0.00";
+    return (swapAmount * prices[swapOrigin.id].usd).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  // Cálculo do retorno estimado (Quanto vai receber do outro ativo)
   const getEstimatedReturn = () => {
-    if (!swapAmount || !prices[swapOrigin.id] || !prices[swapDest.id]) return "0.00";
-    const originPrice = prices[swapOrigin.id].usd;
-    const destPrice = prices[swapDest.id].usd;
-    return ((swapAmount * originPrice) / destPrice).toFixed(6);
+    if (!swapAmount || !prices[swapOrigin.id] || !prices[swapDest.id]) return "0.000000";
+    const totalUSD = swapAmount * prices[swapOrigin.id].usd;
+    const result = totalUSD / prices[swapDest.id].usd;
+    return result.toFixed(6);
   };
 
   return (
@@ -87,43 +94,37 @@ function WalletInterface() {
       </header>
 
       <main className="terminal-main">
-        {/* COLUNA ESQUERDA: SWAP DINÂMICO */}
         <aside className="column left">
           <section className="panel swap-section">
             <h3 className="panel-label">SWAP ENGINE</h3>
             <div className="swap-content">
+              {/* ORIGEM */}
               <div className="field-box">
-                <label className="min-label">FROM</label>
-                <select 
-                  className="input-tiny" 
-                  value={swapOrigin.symbol} 
-                  onChange={(e) => setSwapOrigin(ASSETS_LIST.find(a => a.symbol === e.target.value))}
-                >
-                  {ASSETS_LIST.map(a => <option key={a.symbol} value={a.symbol}>{a.symbol}</option>)}
-                </select>
-                <input 
-                  type="number" 
-                  className="input-tiny" 
-                  placeholder="0.00" 
-                  value={swapAmount} 
-                  onChange={e => setSwapAmount(e.target.value)} 
-                />
+                <div className="field-header">
+                  <label className="min-label">FROM</label>
+                  <span className="balance-label">VAL: ${getInputValueInUSD()}</span>
+                </div>
+                <div className="input-group">
+                  <select className="input-tiny" value={swapOrigin.symbol} onChange={(e) => setSwapOrigin(ASSETS_LIST.find(a => a.symbol === e.target.value))}>
+                    {ASSETS_LIST.map(a => <option key={a.symbol} value={a.symbol}>{a.symbol}</option>)}
+                  </select>
+                  <input type="number" className="input-tiny main-val" placeholder="0.00" value={swapAmount} onChange={e => setSwapAmount(e.target.value)} />
+                </div>
               </div>
               
-              <div className="swap-divider" onClick={() => {
-                const temp = swapOrigin; setSwapOrigin(swapDest); setSwapDest(temp);
-              }} style={{cursor: 'pointer'}}>⇅</div>
+              <div className="swap-divider" onClick={() => { const t = swapOrigin; setSwapOrigin(swapDest); setSwapDest(t); }}>⇅</div>
               
+              {/* DESTINO */}
               <div className="field-box">
-                <label className="min-label">TO</label>
-                <select 
-                  className="input-tiny" 
-                  value={swapDest.symbol} 
-                  onChange={(e) => setSwapDest(ASSETS_LIST.find(a => a.symbol === e.target.value))}
-                >
-                  {ASSETS_LIST.map(a => <option key={a.symbol} value={a.symbol}>{a.symbol}</option>)}
-                </select>
-                <div className="readonly-box">{getEstimatedReturn()}</div>
+                <div className="field-header">
+                  <label className="min-label">TO (ESTIMATED)</label>
+                </div>
+                <div className="input-group">
+                  <select className="input-tiny" value={swapDest.symbol} onChange={(e) => setSwapDest(ASSETS_LIST.find(a => a.symbol === e.target.value))}>
+                    {ASSETS_LIST.map(a => <option key={a.symbol} value={a.symbol}>{a.symbol}</option>)}
+                  </select>
+                  <div className="readonly-box main-val">{getEstimatedReturn()}</div>
+                </div>
               </div>
               <button className="btn-neon">EXECUTE SWAP</button>
             </div>
@@ -137,43 +138,32 @@ function WalletInterface() {
           </section>
         </aside>
 
-        {/* COLUNA CENTRAL: GRÁFICO */}
         <section className="column center">
           <div className="asset-selector-header">
-            <span className="text-dim">CHART ASSET:</span>
-            <select 
-              className="select-asset-main" 
-              value={selectedChartAsset.symbol} 
-              onChange={(e) => setSelectedChartAsset(ASSETS_LIST.find(a => a.symbol === e.target.value))}
-            >
+            <span className="text-dim">CHART:</span>
+            <select className="select-asset-main" value={selectedChartAsset.symbol} onChange={(e) => setSelectedChartAsset(ASSETS_LIST.find(a => a.symbol === e.target.value))}>
               {ASSETS_LIST.map(a => (
-                <option key={a.symbol} value={a.symbol}>{a.symbol} - ${prices[a.id]?.usd || '0.00'}</option>
+                <option key={a.symbol} value={a.symbol}>{a.symbol} - ${prices[a.id]?.usd?.toFixed(2) || '0.00'}</option>
               ))}
             </select>
           </div>
           <div className="chart-container-box">
-            <iframe 
-              src={`https://s.tradingview.com/widgetembed/?symbol=${selectedChartAsset.pair}&interval=D&theme=dark`} 
-              width="100%" height="100%" frameBorder="0" title="tv-chart"
-            ></iframe>
+            <iframe src={`https://s.tradingview.com/widgetembed/?symbol=${selectedChartAsset.pair}&interval=D&theme=dark`} width="100%" height="100%" frameBorder="0" title="tv-chart"></iframe>
           </div>
         </section>
 
-        {/* COLUNA DIREITA: STATUS */}
         <aside className="column right">
           <section className="panel wallet-section">
             <h3 className="panel-label">WALLET</h3>
             <div className="wallet-row">
-              <div className="addr-txt">{isConnected ? `${address.slice(0,6)}...${address.slice(-4)}` : 'DISCONNECTED'}</div>
+              <div className="addr-txt">{isConnected ? `${address.slice(0,6)}...${address.slice(-4)}` : 'OFFLINE'}</div>
               <div className="neon-txt">ANKR: 1,250.00</div>
             </div>
           </section>
-
           <section className="panel collections-section">
             <h3 className="panel-label">COLLECTIONS</h3>
             <div className="empty-center">NO DATA</div>
           </section>
-
           <section className="panel monitor-section">
             <h3 className="panel-label">MONITOR</h3>
             <img src={animationGif} alt="monitor" className="gif-tiny" />
