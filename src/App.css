@@ -1,8 +1,8 @@
 :root {
   --neon: #adff2f;
   --bg-dark: #050505;
-  --panel-bg: rgba(10, 10, 10, 0.9);
-  --border: rgba(173, 255, 47, 0.3);
+  --panel-bg: rgba(10, 10, 10, 0.95);
+  --border: rgba(173, 255, 47, 0.4);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -13,43 +13,40 @@ body, html {
   font-family: 'Courier New', monospace;
   height: 100vh;
   width: 100vw;
-  overflow: hidden; /* Proíbe o scroll que estava bugando seu zoom */
+  overflow: hidden;
 }
 
 .layout-personalizado {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-size: cover;
-  background-position: center;
 }
 
-/* --- NAVBAR AJUSTADA --- */
+/* NAVBAR */
 .navbar {
   height: 50px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 15px;
+  padding: 0 20px;
   border-bottom: 1px solid var(--border);
   background: #000;
+  flex-shrink: 0;
 }
-
-.logo-container { width: 35px; height: 35px; overflow: hidden; }
+.logo-container { width: 40px; height: 40px; }
 .minha-logo { width: 100%; height: 100%; object-fit: contain; }
-.terminal-header-title { color: var(--neon); font-size: 0.8rem; letter-spacing: 2px; }
 
-/* --- ÁREA CENTRAL DINÂMICA --- */
+/* MAIN AREA */
 .main-content-area {
-  flex: 1; /* Ocupa todo o espaço entre o topo e o rodapé */
+  flex: 1;
   display: flex;
   padding: 10px;
-  gap: 10px;
-  min-height: 0; /* Importante para flexbox não transbordar */
+  gap: 12px;
+  min-height: 0;
 }
 
 .side-panel {
-  width: 190px;
+  width: 220px; /* Aumentado para o Swap respirar */
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -64,99 +61,98 @@ body, html {
   min-width: 0;
 }
 
+/* PANELS */
 .glass-panel {
   background: var(--panel-bg);
   border: 1px solid var(--border);
-  padding: 10px;
+  padding: 12px;
   border-radius: 2px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
 }
 
-.chart-container {
-  flex: 1;
-  position: relative;
-  background: #000;
-  min-height: 0;
+.panel-title { 
+  font-size: 0.7rem; 
+  color: var(--neon); 
+  margin-bottom: 10px; 
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
 }
 
-/* --- TABS DE ATIVOS --- */
-.asset-bar {
-  display: flex;
-  gap: 2px;
-  overflow-x: auto;
-}
-
-.asset-bar::-webkit-scrollbar { display: none; }
-
-.tab-normal, .tab-active {
-  flex: 1;
-  padding: 6px 0;
-  font-size: 0.6rem;
-  background: #000;
-  color: #666;
+/* SWAP ENGINE */
+.swap-divider { text-align: center; color: var(--neon); margin: 5px 0; font-weight: bold; }
+.result-display {
+  background: rgba(173, 255, 47, 0.1);
   border: 1px solid var(--border);
-  cursor: pointer;
+  padding: 8px;
+  text-align: right;
+  font-size: 0.8rem;
+  color: var(--neon);
+  margin-bottom: 10px;
 }
 
-.tab-active {
-  background: var(--neon);
-  color: #000;
-  font-weight: bold;
-}
-
-/* --- COMPONENTES DE UI --- */
-.panel-title { font-size: 0.65rem; color: var(--neon); margin-bottom: 8px; border-bottom: 1px solid var(--border); }
-
+/* UI ELEMENTS */
 .ui-input {
   width: 100%;
-  background: rgba(255,255,255,0.05);
+  background: #000;
   border: 1px solid var(--border);
   color: #fff;
-  padding: 6px;
+  padding: 8px;
   margin-bottom: 5px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
-
 .ui-btn {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   background: transparent;
   color: var(--neon);
   border: 1px solid var(--neon);
   cursor: pointer;
   font-weight: bold;
+  text-transform: uppercase;
   font-size: 0.7rem;
 }
+.ui-btn:hover { background: var(--neon); color: #000; }
 
-.monitor-gif { width: 100%; max-height: 70px; object-fit: contain; }
-.sys-time { font-size: 0.7rem; text-align: center; color: var(--neon); margin-top: 5px; }
+/* CHART & TABS */
+.asset-bar { display: flex; gap: 2px; overflow-x: hidden; }
+.tab-normal, .tab-active {
+  flex: 1; padding: 6px; font-size: 0.6rem;
+  background: #000; color: #555; border: 1px solid var(--border);
+}
+.tab-active { background: var(--neon); color: #000; font-weight: bold; }
 
-/* --- GEM BADGE --- */
+.chart-container { flex: 1; position: relative; background: #000; }
+
+/* COLLECTIONS Area */
+.collections-area { flex: 1; overflow-y: auto; }
+.nft-grid { font-size: 0.65rem; color: #555; text-align: center; margin-top: 20px; }
+
+/* MONITOR */
+.monitor-gif { width: 100%; height: 60px; object-fit: contain; }
+.sys-time { font-size: 0.65rem; text-align: center; color: var(--neon); }
+
+/* SCANNER BADGE */
 .gem-badge {
-  position: absolute; top: 10px; right: 10px;
-  background: rgba(0,0,0,0.85);
+  position: absolute; top: 15px; right: 15px;
+  background: rgba(0,0,0,0.9);
   border: 1px solid var(--neon);
-  padding: 4px 10px; font-size: 0.65rem; color: var(--neon);
-  z-index: 10; display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; font-size: 0.7rem; color: var(--neon);
+  z-index: 10; display: flex; align-items: center; gap: 8px;
+  cursor: pointer;
 }
+.dot-blink { width: 8px; height: 8px; background: var(--neon); border-radius: 50%; animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-.dot-blink { width: 6px; height: 6px; background: var(--neon); border-radius: 50%; animation: pulse 1s infinite; }
-@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
-
-/* --- FOOTER --- */
+/* FOOTER TICKER */
 .ticker-footer {
-  height: 25px;
-  background: #000;
-  border-top: 1px solid var(--neon);
-  display: flex;
-  align-items: center;
-  overflow: hidden;
+  height: 25px; background: #000; border-top: 1px solid var(--border);
+  display: flex; align-items: center; overflow: hidden;
 }
-
-.ticker-wrapper { display: flex; animation: scroll 30s linear infinite; }
-.ticker-item { padding: 0 15px; font-size: 0.65rem; white-space: nowrap; }
+.ticker-wrapper { display: flex; animation: scroll 40s linear infinite; }
+.ticker-item { padding: 0 25px; font-size: 0.65rem; white-space: nowrap; border-right: 1px solid #222; }
 @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-/* --- CRT EFFECT --- */
+/* CRT EFFECT */
 .crt-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%), 
