@@ -8,7 +8,6 @@ import { parseEther } from 'viem';
 import '@rainbow-me/rainbowkit/styles.css';
 import './App.css';
 
-// Importações de assets
 import fundoImg from './assets/fundo.jpg';
 import logoImg from './assets/logo.png';
 import animationGif from './assets/animation.gif'; 
@@ -28,7 +27,7 @@ const config = getDefaultConfig({
 
 const queryClient = new QueryClient();
 
-// LISTA DE ATIVOS ATUALIZADA COM OS 5 NOVOS
+// Lista atualizada conforme as fotos enviadas
 const ASSETS = [
   { symbol: 'ANKR', id: 'ankr', pair: 'BINANCE:ANKRUSDT' },
   { symbol: 'BTC', id: 'bitcoin', pair: 'BITSTAMP:BTCUSD' },
@@ -43,13 +42,9 @@ const ASSETS = [
   { symbol: 'POL', id: 'matic-network', pair: 'BINANCE:POLUSDT' },
   { symbol: 'HYPE', id: 'hyperliquid', pair: 'BYBIT:HYPEUSDT' },
   { symbol: 'AVAX', id: 'avalanche-2', pair: 'BINANCE:AVAXUSDT' },
+  { symbol: 'JUP', id: 'jupiter-exchange-solana', pair: 'BINANCE:JUPUSDT' },
   { symbol: 'DOT', id: 'polkadot', pair: 'BINANCE:DOTUSDT' },
-  { symbol: 'LINK', id: 'chainlink', pair: 'BINANCE:LINKUSDT' },
-  { symbol: 'DOGE', id: 'dogecoin', pair: 'BINANCE:DOGEUSDT' },
-  { symbol: 'NEAR', id: 'near', pair: 'BINANCE:NEARUSDT' },
-  { symbol: 'APT', id: 'aptos', pair: 'BINANCE:APTUSDT' },
-  { symbol: 'UNI', id: 'uniswap', pair: 'BINANCE:UNIUSDT' },
-  { symbol: 'ARB', id: 'arbitrum', pair: 'BINANCE:ARBUSDT' },
+  { symbol: 'XLM', id: 'stellar', pair: 'BINANCE:XLMUSDT' }
 ];
 
 function WalletInterface() {
@@ -57,113 +52,104 @@ function WalletInterface() {
   const [chartSymbol, setChartSymbol] = useState('BINANCE:ANKRUSDT');
   const [prices, setPrices] = useState({});
   const [swapAmount, setSwapAmount] = useState('');
-  const [transfQty, setTransfQty] = useState('');
-  const [recipient, setRecipient] = useState('');
   const [time, setTime] = useState(new Date().toLocaleTimeString());
-
-  const { data: hash, sendTransaction, isPending } = useSendTransaction();
-  const { isLoading: isConfirming, isSuccess, isError } = useWaitForTransactionReceipt({ hash });
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date().toLocaleTimeString()), 1000);
     const fetchPrices = async () => {
       try {
         const ids = ASSETS.map(a => a.id).join(',');
-        const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+        const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
         setPrices(res.data);
       } catch (e) { console.error(e); }
     };
     fetchPrices();
-    const interval = setInterval(fetchPrices, 30000);
-    return () => { clearInterval(timer); clearInterval(interval); };
+    return () => clearInterval(timer);
   }, []);
 
   return (
-    <div className="layout-personalizado" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${fundoImg})`}}>
-      <nav className="navbar">
-        <img src={logoImg} className="minha-logo" alt="logo" />
-        <div className="terminal-id">NEURA PRO TERMINAL v1.0</div>
-        <ConnectButton label="CONNECT" />
-      </nav>
+    <div className="terminal-container" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.9)), url(${fundoImg})`}}>
+      <div className="scanline"></div>
+      
+      <header className="top-nav">
+        <div className="logo-box"><img src={logoImg} alt="logo" /></div>
+        <div className="terminal-title">NEURA PRO TERMINAL v1.1</div>
+        <div className="wallet-btn-area"><ConnectButton label="CONNECT" /></div>
+      </header>
 
-      <div className="main-grid-layout">
-        <div className="grid-item side-col">
-          <div className="glass-panel ultra-transp compact">
-            <h2 className="rect-title">SWAP ENGINE</h2>
-            <div className="box-section">
-              <label className="bright-label">ORIGIN</label>
-              <select className="input-field-transp"><option>ANKR</option></select>
-              <input type="number" className="input-field-transp" placeholder="0.00" value={swapAmount} onChange={e => setSwapAmount(e.target.value)} />
-              <label className="bright-label">DESTINATION</label>
-              <select className="input-field-transp"><option>BTC</option></select>
-              <div className="result-display-box">{swapAmount ? (swapAmount * 0.98).toFixed(6) : "0.0000"}</div>
-              <button className="btn-neon">EXECUTE SWAP</button>
-            </div>
-          </div>
-
-          <div className="glass-panel ultra-transp compact" style={{marginTop: '10px'}}>
-            <h2 className="rect-title">TRANSFER</h2>
-            <div className="box-section">
-              <input type="number" className="input-field-transp" placeholder="Qty..." onChange={e => setTransfQty(e.target.value)} />
-              <input className="input-field-transp" placeholder="Recipient 0x..." onChange={e => setRecipient(e.target.value)} />
-              <button className="btn-neon" onClick={() => sendTransaction({ to: recipient, value: parseEther(transfQty) })}>
-                {isPending ? 'SENDING...' : 'SEND ASSETS'}
-              </button>
-              <div className={`status-display ${isSuccess ? 'success' : isError ? 'error' : ''}`}>
-                {isSuccess ? 'SUCCESS' : isError ? 'ERROR' : 'READY'}
+      <main className="content-grid">
+        {/* COLUNA ESQUERDA: SWAP ENGINE COMPLETO */}
+        <aside className="left-panel">
+          <div className="glass-card swap-card">
+            <h2 className="card-label">SWAP ENGINE</h2>
+            <div className="swap-form">
+              <div className="field">
+                <label>ORIGIN</label>
+                <select className="input-box"><option>ANKR</option></select>
+                <input type="number" className="input-box" placeholder="0.00" value={swapAmount} onChange={e => setSwapAmount(e.target.value)} />
               </div>
+              <div className="swap-arrow">⇅</div>
+              <div className="field">
+                <label>DESTINATION</label>
+                <select className="input-box"><option>BTC</option></select>
+                <div className="result-field">{swapAmount ? (swapAmount * 0.00000005).toFixed(8) : "0.00000000"}</div>
+              </div>
+              <button className="execute-btn">EXECUTE SWAP</button>
             </div>
           </div>
-        </div>
 
-        <div className="grid-item center-panel">
-          <div className="chart-selector-grid">
-            {/* MOSTRANDO OS 12 PRIMEIROS ATIVOS (INCLUINDO OS NOVOS) */}
-            {ASSETS.slice(0, 12).map(a => (
-              <button key={a.symbol} onClick={() => setChartSymbol(a.pair)} className={chartSymbol === a.pair ? 'btn-chart-active' : 'btn-chart-normal'}>
+          <div className="glass-card transfer-card">
+            <h2 className="card-label">TRANSFER</h2>
+            <input className="input-box" placeholder="Qty..." />
+            <input className="input-box" placeholder="Recipient 0x..." />
+            <button className="execute-btn">SEND ASSETS</button>
+          </div>
+        </aside>
+
+        {/* CENTRO: GRÁFICO E BARRA DE ATIVOS */}
+        <section className="center-panel">
+          <div className="asset-grid">
+            {ASSETS.map(a => (
+              <button key={a.symbol} onClick={() => setChartSymbol(a.pair)} className={chartSymbol === a.pair ? 'asset-tab active' : 'asset-tab'}>
                 {a.symbol}
               </button>
             ))}
           </div>
-          <div className="glass-panel chart-wrapper ultra-transp">
-            <iframe src={`https://s.tradingview.com/widgetembed/?symbol=${chartSymbol}&interval=D&theme=dark`} width="100%" height="100%" frameBorder="0" className="graph-iframe" title="chart"></iframe>
+          <div className="glass-card chart-frame">
+            <iframe src={`https://s.tradingview.com/widgetembed/?symbol=${chartSymbol}&interval=D&theme=dark`} width="100%" height="100%" frameBorder="0" title="tv-chart"></iframe>
           </div>
-          <h1 className="main-title">NEURA PRO TERMINAL</h1>
-        </div>
+        </section>
 
-        <div className="grid-item side-col">
-          <div className="glass-panel ultra-transp compact">
-            <h2 className="rect-title">WALLET INFO</h2>
-            <div className="wallet-info-hub">
-              <div className="addr-txt">{isConnected ? `${address.slice(0,10)}...${address.slice(-6)}` : 'NOT CONNECTED'}</div>
-              <div className="balance-item"><span>ANKR:</span><span className="green-val">1,250.00</span></div>
-            </div>
+        {/* COLUNA DIREITA: WALLET E COLLECTIONS */}
+        <aside className="right-panel">
+          <div className="glass-card wallet-card">
+            <h2 className="card-label">WALLET INFO</h2>
+            <div className="info-text">{isConnected ? address : '0x00...0000'}</div>
+            <div className="balance-text">ANKR: <span className="neon">1,250.00</span></div>
           </div>
 
-          <div className="glass-panel ultra-transp compact" style={{marginTop: '10px'}}>
-            <h2 className="rect-title">COLLECTIONS</h2>
-            <div className="nft-grid-placeholder">NO NFTS FOUND</div>
+          <div className="glass-card collections-card">
+            <h2 className="card-label">COLLECTIONS</h2>
+            <div className="empty-msg">NO NFTS FOUND</div>
           </div>
 
-          <div className="glass-panel ultra-transp compact animation-box" style={{marginTop: '10px'}}>
-              <h2 className="rect-title">SYS MONITOR</h2>
-              <img src={animationGif} alt="Animation" className="side-gif" />
-              <div className="live-clock-terminal">SYS_TIME: {time}</div>
+          <div className="glass-card monitor-card">
+            <h2 className="card-label">SYS MONITOR</h2>
+            <img src={animationGif} alt="monitor" className="monitor-gif" />
+            <div className="clock-text">SYS_TIME: {time}</div>
           </div>
-        </div>
-      </div>
+        </aside>
+      </main>
 
-      <div className="footer-ticker-bar">
-        <div className="ticker-track">
-          {[...ASSETS, ...ASSETS].map((asset, index) => (
-            <div key={index} className={`ticker-item ${asset.symbol === 'ANKR' ? 'highlight-ankr' : ''}`}>
-              <span className="asset-name">{asset.symbol}</span>
-              <span className="asset-price">${prices[asset.id]?.usd ? prices[asset.id].usd.toFixed(2) : '0.00'}</span>
-              <span className="ticker-bullet">•</span>
+      <footer className="footer-ticker">
+        <div className="ticker-scroll">
+          {[...ASSETS, ...ASSETS].map((a, i) => (
+            <div key={i} className="ticker-unit">
+              {a.symbol}: <span className="neon">${prices[a.id]?.usd?.toFixed(2) || '0.00'}</span>
             </div>
           ))}
         </div>
-      </div>
+      </footer>
     </div>
   );
 }
