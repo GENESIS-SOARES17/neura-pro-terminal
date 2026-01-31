@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getDefaultConfig, RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
-import { WagmiProvider, useAccount, useSendTransaction, useWaitForTransactionReceipt } from 'wagmi';
+import { WagmiProvider, useAccount } from 'wagmi';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { parseEther } from 'viem';
 import '@rainbow-me/rainbowkit/styles.css';
 import './App.css';
 
-// Importação de Assets
+// Assets
 import fundoImg from './assets/fundo.jpg';
 import logoImg from './assets/logo.png';
 import animationGif from './assets/animation.gif'; 
@@ -28,30 +27,29 @@ const config = getDefaultConfig({
 
 const queryClient = new QueryClient();
 
-// Lista expandida para preencher o espaço do cabeçalho
-const ASSETS = [
+// Lista completa de ativos para o Dropdown
+const ASSETS_LIST = [
   { symbol: 'ANKR', id: 'ankr', pair: 'BINANCE:ANKRUSDT' },
   { symbol: 'BTC', id: 'bitcoin', pair: 'BITSTAMP:BTCUSD' },
   { symbol: 'ETH', id: 'ethereum', pair: 'BITSTAMP:ETHUSD' },
   { symbol: 'SOL', id: 'solana', pair: 'BINANCE:SOLUSDT' },
+  { symbol: 'HYPE', id: 'hyperliquid', pair: 'BYBIT:HYPEUSDT' },
+  { symbol: 'AVAX', id: 'avalanche-2', pair: 'BINANCE:AVAXUSDT' },
+  { symbol: 'SUI', id: 'sui', pair: 'BINANCE:SUIUSDT' },
+  { symbol: 'JUP', id: 'jupiter-exchange-solana', pair: 'BINANCE:JUPUSDT' },
+  { symbol: 'XLM', id: 'stellar', pair: 'BINANCE:XLMUSDT' },
+  { symbol: 'DOT', id: 'polkadot', pair: 'BINANCE:DOTUSDT' },
   { symbol: 'BNB', id: 'binancecoin', pair: 'BINANCE:BNBUSDT' },
   { symbol: 'XRP', id: 'ripple', pair: 'BINANCE:XRPUSDT' },
   { symbol: 'ADA', id: 'cardano', pair: 'BINANCE:ADAUSDT' },
-  { symbol: 'USDC', id: 'usd-coin', pair: 'BINANCE:USDCUSDT' },
   { symbol: 'TRX', id: 'tron', pair: 'BINANCE:TRXUSDT' },
-  { symbol: 'SUI', id: 'sui', pair: 'BINANCE:SUIUSDT' },
   { symbol: 'POL', id: 'matic-network', pair: 'BINANCE:POLUSDT' },
-  { symbol: 'HYPE', id: 'hyperliquid', pair: 'BYBIT:HYPEUSDT' },
-  { symbol: 'XLM', id: 'stellar', pair: 'BINANCE:XLMUSDT' },
-  { symbol: 'AVAX', id: 'avalanche-2', pair: 'BINANCE:AVAXUSDT' },
-  { symbol: 'DOT', id: 'polkadot', pair: 'BINANCE:DOTUSDT' },
-  { symbol: 'JUP', id: 'jupiter-exchange-solana', pair: 'BINANCE:JUPUSDT' },
   { symbol: 'IMX', id: 'immutable-x', pair: 'BINANCE:IMXUSDT' }
 ];
 
 function WalletInterface() {
   const { address, isConnected } = useAccount();
-  const [chartSymbol, setChartSymbol] = useState('BINANCE:ANKRUSDT');
+  const [selectedAsset, setSelectedAsset] = useState(ASSETS_LIST[0]);
   const [prices, setPrices] = useState({});
   const [swapAmount, setSwapAmount] = useState('');
   const [time, setTime] = useState(new Date().toLocaleTimeString());
@@ -60,7 +58,7 @@ function WalletInterface() {
     const timer = setInterval(() => setTime(new Date().toLocaleTimeString()), 1000);
     const fetchPrices = async () => {
       try {
-        const ids = ASSETS.map(a => a.id).join(',');
+        const ids = ASSETS_LIST.map(a => a.id).join(',');
         const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
         setPrices(res.data);
       } catch (e) { console.error(e); }
@@ -68,6 +66,11 @@ function WalletInterface() {
     fetchPrices();
     return () => clearInterval(timer);
   }, []);
+
+  const handleAssetChange = (e) => {
+    const asset = ASSETS_LIST.find(a => a.symbol === e.target.value);
+    setSelectedAsset(asset);
+  };
 
   return (
     <div className="terminal-v1-1" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.9)), url(${fundoImg})`}}>
@@ -80,7 +83,7 @@ function WalletInterface() {
       </header>
 
       <main className="dashboard-grid">
-        {/* COLUNA ESQUERDA: SWAP E TRANSFER */}
+        {/* COLUNA ESQUERDA */}
         <aside className="panel-side">
           <section className="glass-panel swap-engine">
             <h2 className="label-tag">SWAP ENGINE</h2>
@@ -108,25 +111,33 @@ function WalletInterface() {
           </section>
         </aside>
 
-        {/* CENTRO: CABEÇALHO DE ATIVOS E GRÁFICO */}
+        {/* CENTRO: NOVO SELETOR DE ATIVOS E GRÁFICO */}
         <section className="panel-center">
-          <div className="asset-header-grid">
-            {ASSETS.map(a => (
-              <button 
-                key={a.symbol} 
-                onClick={() => setChartSymbol(a.pair)} 
-                className={chartSymbol === a.pair ? 'asset-card active' : 'asset-card'}
-              >
-                {a.symbol}
-              </button>
-            ))}
+          <div className="asset-selector-bar">
+            <div className="selector-label">SELECT ASSET:</div>
+            <select className="asset-dropdown" value={selectedAsset.symbol} onChange={handleAssetChange}>
+              {ASSETS_LIST.map(a => (
+                <option key={a.symbol} value={a.symbol}>
+                  {a.symbol} - ${prices[a.id]?.usd || '0.00'}
+                </option>
+              ))}
+            </select>
+            <div className="selected-info">
+              VIEWING: <span className="neon-text">{selectedAsset.symbol}</span>
+            </div>
           </div>
           <div className="glass-panel chart-box">
-            <iframe src={`https://s.tradingview.com/widgetembed/?symbol=${chartSymbol}&interval=D&theme=dark`} width="100%" height="100%" frameBorder="0" title="tv"></iframe>
+            <iframe 
+              src={`https://s.tradingview.com/widgetembed/?symbol=${selectedAsset.pair}&interval=D&theme=dark`} 
+              width="100%" 
+              height="100%" 
+              frameBorder="0" 
+              title="tv"
+            ></iframe>
           </div>
         </section>
 
-        {/* COLUNA DIREITA: INFO E MONITOR */}
+        {/* COLUNA DIREITA */}
         <aside className="panel-side">
           <section className="glass-panel">
             <h2 className="label-tag">WALLET INFO</h2>
@@ -151,7 +162,7 @@ function WalletInterface() {
 
       <footer className="footer-bar">
         <div className="ticker-wrap">
-          {[...ASSETS, ...ASSETS].map((a, i) => (
+          {ASSETS_LIST.concat(ASSETS_LIST).map((a, i) => (
             <div key={i} className="ticker-item">
               {a.symbol}: <span className="neon-text">${prices[a.id]?.usd?.toFixed(2) || '0.00'}</span>
             </div>
