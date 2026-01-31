@@ -55,7 +55,7 @@ function WalletInterface() {
   const { address, isConnected } = useAccount();
   const [chartSymbol, setChartSymbol] = useState('BINANCE:ANKRUSDT');
   const [prices, setPrices] = useState({});
-  const [topGem, setTopGem] = useState(null);
+  const [selectedGem, setSelectedGem] = useState(null);
   const [swapAmount, setSwapAmount] = useState('');
   const [transfQty, setTransfQty] = useState('');
   const [recipient, setRecipient] = useState('');
@@ -72,30 +72,37 @@ function WalletInterface() {
         const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
         setPrices(res.data);
         
-        // Lógica do Scanner de Gems
-        let bestPerformers = Object.entries(res.data)
-          .map(([id, val]) => ({ id, change: val.usd_24h_change || 0 }))
-          .sort((a, b) => b.change - a.change);
-        
-        if (bestPerformers.length > 0) {
-          const gem = ASSETS.find(a => a.id === bestPerformers[0].id);
-          setTopGem({ ...gem, change: bestPerformers[0].change });
+        // Auto-select top gem apenas se o usuário não escolheu uma
+        if (!selectedGem) {
+          let best = Object.entries(res.data)
+            .map(([id, val]) => ({ id, change: val.usd_24h_change || 0 }))
+            .sort((a, b) => b.change - a.change)[0];
+          
+          const gem = ASSETS.find(a => a.id === best.id);
+          setSelectedGem({ ...gem, change: best.change });
+        } else {
+          // Atualiza a porcentagem da gem que o usuário escolheu
+          const updatedChange = res.data[selectedGem.id]?.usd_24h_change || 0;
+          setSelectedGem(prev => ({ ...prev, change: updatedChange }));
         }
       } catch (e) { console.error(e); }
     };
     fetchPrices();
     const interval = setInterval(fetchPrices, 30000);
     return () => { clearInterval(timer); clearInterval(interval); };
-  }, []);
+  }, [selectedGem?.id]);
+
+  const handleAssetClick = (asset) => {
+    setChartSymbol(asset.pair);
+    setSelectedGem({ ...asset, change: prices[asset.id]?.usd_24h_change || 0 });
+  };
 
   return (
     <div className="layout-personalizado" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${fundoImg})`}}>
-      
       <div className="crt-overlay"></div>
-
       <nav className="navbar">
         <img src={logoImg} className="minha-logo" alt="logo" />
-        <div className="terminal-id">NEURA PRO TERMINAL v1.0</div>
+        <div className="terminal-id">NEURA PRO TERMINAL v1.1</div>
         <ConnectButton label="CONNECT" />
       </nav>
 
@@ -132,17 +139,17 @@ function WalletInterface() {
         <div className="grid-item center-panel">
           <div className="chart-selector-grid">
             {ASSETS.slice(0, 12).map(a => (
-              <button key={a.symbol} onClick={() => setChartSymbol(a.pair)} className={chartSymbol === a.pair ? 'btn-chart-active' : 'btn-chart-normal'}>
+              <button key={a.symbol} onClick={() => handleAssetClick(a)} className={chartSymbol === a.pair ? 'btn-chart-active' : 'btn-chart-normal'}>
                 {a.symbol}
               </button>
             ))}
           </div>
           <div className="glass-panel chart-wrapper">
-            {/* BADGE DE TRENDING GEM */}
-            {topGem && (
-              <div className="gem-scanner-badge">
+            {selectedGem && (
+              <div className="gem-scanner-badge" onClick={() => setSelectedGem(null)} title="Click to Reset to Auto">
                 <span className="scanner-dot"></span>
-                TOP_GEM: {topGem.symbol} (+{topGem.change.toFixed(2)}%)
+                <span className="gem-label">{selectedGem.id === ASSETS.sort((a,b) => (prices[b.id]?.usd_24h_change || 0) - (prices[a.id]?.usd_24h_change || 0))[0].id ? 'TOP_GEM' : 'WATCHING'}:</span>
+                <span className="gem-value">{selectedGem.symbol} ({selectedGem.change >= 0 ? '+' : ''}{selectedGem.change.toFixed(2)}%)</span>
               </div>
             )}
             <iframe src={`https://s.tradingview.com/widgetembed/?symbol=${chartSymbol}&interval=D&theme=dark`} width="100%" height="100%" frameBorder="0" className="graph-iframe" title="chart"></iframe>
