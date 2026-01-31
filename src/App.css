@@ -1,7 +1,9 @@
 :root {
   --neon: #adff2f;
   --border: rgba(173, 255, 47, 0.2);
-  --glass: rgba(5, 5, 5, 0.9);
+  --glass: rgba(5, 5, 5, 0.95);
+  --header-h: 45px;
+  --footer-h: 25px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -9,148 +11,158 @@
 body, html {
   height: 100vh;
   width: 100vw;
-  overflow: hidden; /* Remove barras de rolagem */
+  overflow: hidden; /* Proíbe o scroll */
   background: #000;
   font-family: 'Courier New', monospace;
   color: #fff;
 }
 
-.terminal-v1-1 {
+.app-viewport {
   height: 100vh;
+  width: 100vw;
   display: flex;
   flex-direction: column;
   background-size: cover;
+  background-position: center;
 }
 
 /* HEADER */
-.main-nav {
-  height: 45px;
+.terminal-header {
+  height: var(--header-h);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 15px;
   border-bottom: 1px solid var(--border);
+  background: #000;
+  flex-shrink: 0;
 }
-.brand { width: 32px; }
-.brand img { width: 100%; }
-.terminal-id { color: var(--neon); font-size: 0.8rem; letter-spacing: 2px; }
+.brand-box { width: 30px; }
+.brand-box img { width: 100%; }
+.header-title { color: var(--neon); font-size: 0.8rem; letter-spacing: 1px; }
 
-/* CONTAINER PRINCIPAL */
-.content-container {
-  flex: 1; /* Ocupa o espaço entre header e footer */
+/* MAIN LAYOUT */
+.terminal-main {
+  flex: 1; /* Ocupa exatamente o espaço restante entre header e footer */
   display: flex;
-  padding: 8px;
-  gap: 8px;
-  min-height: 0; /* Essencial para o flexbox não vazar */
+  padding: 6px;
+  gap: 6px;
+  min-height: 0; /* Permite que os filhos caibam no flex container */
 }
 
-.side-col {
-  width: 200px;
+.column {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+}
+
+.column.left, .column.right {
+  width: 190px;
   flex-shrink: 0;
 }
 
-.center-col {
+.column.center {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
   min-width: 0;
 }
 
-/* PAINEIS */
-.glass-panel {
+/* PANELS */
+.panel {
   background: var(--glass);
   border: 1px solid var(--border);
-  padding: 10px;
+  padding: 8px;
   border-radius: 2px;
 }
 
-.label-tag {
+.panel-label {
   font-size: 0.55rem;
   color: var(--neon);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   border-bottom: 1px solid var(--border);
+  padding-bottom: 2px;
 }
 
-/* CHART & ASSET BAR */
-.asset-bar {
+/* ESPECÍFICOS PARA ALTURA */
+.swap-section { flex-shrink: 0; }
+.collections-section { flex: 1; overflow: hidden; } /* Essa caixa estica para ocupar o vazio na direita */
+
+/* CHART AREA */
+.asset-selector-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px;
+  padding: 6px;
   background: var(--glass);
   border: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
-.asset-select {
+.select-asset-main {
   background: #000;
   color: var(--neon);
   border: 1px solid var(--neon);
   font-size: 0.75rem;
-  padding: 2px 10px;
+  padding: 2px 8px;
   flex: 1;
 }
 
-.chart-wrapper {
+.chart-container-box {
   flex: 1;
   background: #000;
   border: 1px solid var(--border);
-  overflow: hidden;
+  min-height: 0; /* Crucial para o iframe não empurrar o layout para baixo */
 }
 
-/* UI COMPONENTS */
-.ui-field {
+/* UI ELEMENTS */
+.input-tiny {
   width: 100%;
   background: #000;
   border: 1px solid var(--border);
   color: #fff;
-  padding: 5px;
-  font-size: 0.7rem;
+  padding: 4px;
+  font-size: 0.65rem;
   margin-bottom: 4px;
 }
-.ui-arrow { text-align: center; color: var(--neon); font-size: 1rem; }
-.ui-readonly {
+.swap-divider { text-align: center; color: var(--neon); font-size: 0.8rem; line-height: 1; }
+.readonly-box {
   background: rgba(0,0,0,0.4);
   color: var(--neon);
   text-align: right;
-  padding: 5px;
-  font-size: 0.75rem;
-  margin-bottom: 8px;
+  padding: 4px;
+  font-size: 0.7rem;
+  margin-bottom: 6px;
 }
-.neon-btn {
+.btn-neon {
   width: 100%;
-  padding: 8px;
+  padding: 6px;
   background: transparent;
   color: var(--neon);
   border: 1px solid var(--neon);
   font-weight: bold;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   cursor: pointer;
 }
-.neon-btn:hover { background: var(--neon); color: #000; }
+.btn-neon:hover { background: var(--neon); color: #000; }
 
 /* FOOTER */
-.footer-ticker {
-  height: 25px;
+.terminal-footer {
+  height: var(--footer-h);
   background: #000;
   border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
   overflow: hidden;
+  flex-shrink: 0;
 }
-.ticker-scroll { display: flex; animation: t-move 30s linear infinite; }
-.ticker-box { padding: 0 15px; font-size: 0.65rem; white-space: nowrap; }
+.ticker-container { display: flex; animation: t-move 35s linear infinite; }
+.ticker-unit { padding: 0 15px; font-size: 0.6rem; white-space: nowrap; }
 
 @keyframes t-move { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
 /* UTILS */
-.flex-grow { flex: 1; }
-.min-label { font-size: 0.6rem; color: #666; }
-.neon { color: var(--neon); }
-.small-txt { font-size: 0.6rem; color: #888; }
-.mon-gif { width: 100%; height: 40px; object-fit: contain; }
-.mon-time { text-align: center; font-size: 0.6rem; color: var(--neon); }
-.empty-msg { text-align: center; color: #333; font-size: 0.6rem; margin-top: 20px; }
+.text-dim { font-size: 0.6rem; color: #555; }
+.neon-txt { color: var(--neon); }
+.addr-txt { font-size: 0.55rem; color: #888; }
+.gif-tiny { width: 100%; height: 35px; object-fit: contain; }
+.time-txt { text-align: center; font-size: 0.6rem; color: var(--neon); }
+.empty-center { text-align: center; color: #333; font-size: 0.55rem; margin-top: 15px; }
