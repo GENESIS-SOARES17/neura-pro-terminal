@@ -55,6 +55,7 @@ function WalletInterface() {
   const { address, isConnected } = useAccount();
   const [chartSymbol, setChartSymbol] = useState('BINANCE:ANKRUSDT');
   const [prices, setPrices] = useState({});
+  const [topGem, setTopGem] = useState(null);
   const [swapAmount, setSwapAmount] = useState('');
   const [transfQty, setTransfQty] = useState('');
   const [recipient, setRecipient] = useState('');
@@ -68,8 +69,18 @@ function WalletInterface() {
     const fetchPrices = async () => {
       try {
         const ids = ASSETS.map(a => a.id).join(',');
-        const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+        const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
         setPrices(res.data);
+        
+        // Lógica do Scanner de Gems
+        let bestPerformers = Object.entries(res.data)
+          .map(([id, val]) => ({ id, change: val.usd_24h_change || 0 }))
+          .sort((a, b) => b.change - a.change);
+        
+        if (bestPerformers.length > 0) {
+          const gem = ASSETS.find(a => a.id === bestPerformers[0].id);
+          setTopGem({ ...gem, change: bestPerformers[0].change });
+        }
       } catch (e) { console.error(e); }
     };
     fetchPrices();
@@ -80,7 +91,6 @@ function WalletInterface() {
   return (
     <div className="layout-personalizado" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${fundoImg})`}}>
       
-      {/* Camada do Efeito CRT */}
       <div className="crt-overlay"></div>
 
       <nav className="navbar">
@@ -128,6 +138,13 @@ function WalletInterface() {
             ))}
           </div>
           <div className="glass-panel chart-wrapper">
+            {/* BADGE DE TRENDING GEM */}
+            {topGem && (
+              <div className="gem-scanner-badge">
+                <span className="scanner-dot"></span>
+                TOP_GEM: {topGem.symbol} (+{topGem.change.toFixed(2)}%)
+              </div>
+            )}
             <iframe src={`https://s.tradingview.com/widgetembed/?symbol=${chartSymbol}&interval=D&theme=dark`} width="100%" height="100%" frameBorder="0" className="graph-iframe" title="chart"></iframe>
           </div>
           <h1 className="main-title">NEURA PRO TERMINAL</h1>
