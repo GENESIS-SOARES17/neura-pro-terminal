@@ -72,16 +72,15 @@ function WalletInterface() {
         const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
         setPrices(res.data);
         
-        // Auto-select top gem apenas se o usuário não escolheu uma
         if (!selectedGem) {
-          let best = Object.entries(res.data)
+          let sorted = Object.entries(res.data)
             .map(([id, val]) => ({ id, change: val.usd_24h_change || 0 }))
-            .sort((a, b) => b.change - a.change)[0];
-          
-          const gem = ASSETS.find(a => a.id === best.id);
-          setSelectedGem({ ...gem, change: best.change });
+            .sort((a, b) => b.change - a.change);
+          if (sorted.length > 0) {
+            const gem = ASSETS.find(a => a.id === sorted[0].id);
+            setTopGemManual(gem, sorted[0].change);
+          }
         } else {
-          // Atualiza a porcentagem da gem que o usuário escolheu
           const updatedChange = res.data[selectedGem.id]?.usd_24h_change || 0;
           setSelectedGem(prev => ({ ...prev, change: updatedChange }));
         }
@@ -92,23 +91,40 @@ function WalletInterface() {
     return () => { clearInterval(timer); clearInterval(interval); };
   }, [selectedGem?.id]);
 
+  const setTopGemManual = (asset, change) => {
+    setSelectedGem({ ...asset, change });
+  };
+
   const handleAssetClick = (asset) => {
     setChartSymbol(asset.pair);
     setSelectedGem({ ...asset, change: prices[asset.id]?.usd_24h_change || 0 });
   };
 
+  const isActuallyTop = () => {
+    if (!selectedGem || Object.keys(prices).length === 0) return false;
+    const topId = Object.entries(prices)
+      .map(([id, val]) => ({ id, change: val.usd_24h_change || 0 }))
+      .sort((a, b) => b.change - a.change)[0].id;
+    return selectedGem.id === topId;
+  };
+
   return (
     <div className="layout-personalizado" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${fundoImg})`}}>
       <div className="crt-overlay"></div>
+      
       <nav className="navbar">
-        <img src={logoImg} className="minha-logo" alt="logo" />
+        <div className="logo-container">
+          <img src={logoImg} className="minha-logo" alt="logo" />
+        </div>
         <div className="terminal-id">NEURA PRO TERMINAL v1.1</div>
-        <ConnectButton label="CONNECT" />
+        <div className="nav-connect">
+          <ConnectButton label="CONNECT" />
+        </div>
       </nav>
 
       <div className="main-grid-layout">
-        <div className="grid-item side-col">
-          <div className="glass-panel compact">
+        <aside className="side-col">
+          <div className="glass-panel">
             <h2 className="rect-title">SWAP ENGINE</h2>
             <div className="box-section">
               <label className="bright-label">ORIGIN</label>
@@ -121,7 +137,7 @@ function WalletInterface() {
             </div>
           </div>
 
-          <div className="glass-panel compact">
+          <div className="glass-panel">
             <h2 className="rect-title">TRANSFER</h2>
             <div className="box-section">
               <input type="number" className="input-field-transp" placeholder="Qty..." onChange={e => setTransfQty(e.target.value)} />
@@ -134,9 +150,9 @@ function WalletInterface() {
               </div>
             </div>
           </div>
-        </div>
+        </aside>
 
-        <div className="grid-item center-panel">
+        <main className="center-panel">
           <div className="chart-selector-grid">
             {ASSETS.slice(0, 12).map(a => (
               <button key={a.symbol} onClick={() => handleAssetClick(a)} className={chartSymbol === a.pair ? 'btn-chart-active' : 'btn-chart-normal'}>
@@ -146,19 +162,19 @@ function WalletInterface() {
           </div>
           <div className="glass-panel chart-wrapper">
             {selectedGem && (
-              <div className="gem-scanner-badge" onClick={() => setSelectedGem(null)} title="Click to Reset to Auto">
+              <div className="gem-scanner-badge" onClick={() => setSelectedGem(null)}>
                 <span className="scanner-dot"></span>
-                <span className="gem-label">{selectedGem.id === ASSETS.sort((a,b) => (prices[b.id]?.usd_24h_change || 0) - (prices[a.id]?.usd_24h_change || 0))[0].id ? 'TOP_GEM' : 'WATCHING'}:</span>
+                <span className="gem-label">{isActuallyTop() ? 'TOP_GEM' : 'WATCHING'}:</span>
                 <span className="gem-value">{selectedGem.symbol} ({selectedGem.change >= 0 ? '+' : ''}{selectedGem.change.toFixed(2)}%)</span>
               </div>
             )}
             <iframe src={`https://s.tradingview.com/widgetembed/?symbol=${chartSymbol}&interval=D&theme=dark`} width="100%" height="100%" frameBorder="0" className="graph-iframe" title="chart"></iframe>
           </div>
           <h1 className="main-title">NEURA PRO TERMINAL</h1>
-        </div>
+        </main>
 
-        <div className="grid-item side-col">
-          <div className="glass-panel compact">
+        <aside className="side-col">
+          <div className="glass-panel">
             <h2 className="rect-title">WALLET INFO</h2>
             <div className="wallet-info-hub">
               <div className="addr-txt">{isConnected ? `${address.slice(0,10)}...${address.slice(-6)}` : 'NOT CONNECTED'}</div>
@@ -166,30 +182,30 @@ function WalletInterface() {
             </div>
           </div>
 
-          <div className="glass-panel compact">
+          <div className="glass-panel">
             <h2 className="rect-title">COLLECTIONS</h2>
             <div className="nft-grid-placeholder">NO NFTS FOUND</div>
           </div>
 
-          <div className="glass-panel compact animation-box">
+          <div className="glass-panel animation-box">
               <h2 className="rect-title">SYS MONITOR</h2>
               <img src={animationGif} alt="Animation" className="side-gif" />
               <div className="live-clock-terminal">SYS_TIME: {time}</div>
           </div>
-        </div>
+        </aside>
       </div>
 
-      <div className="footer-ticker-bar">
+      <footer className="footer-ticker-bar">
         <div className="ticker-track">
           {[...ASSETS, ...ASSETS].map((asset, index) => (
-            <div key={index} className={`ticker-item ${asset.symbol === 'ANKR' ? 'highlight-ankr' : ''}`}>
+            <div key={index} className="ticker-item">
               <span className="asset-name">{asset.symbol}</span>
               <span className="asset-price">${prices[asset.id]?.usd ? prices[asset.id].usd.toFixed(2) : '0.00'}</span>
               <span className="ticker-bullet">•</span>
             </div>
           ))}
         </div>
-      </div>
+      </footer>
     </div>
   );
 }
