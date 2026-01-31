@@ -7,7 +7,6 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import './App.css';
 
-// Assets
 import fundoImg from './assets/fundo.jpg';
 import logoImg from './assets/logo.png';
 import animationGif from './assets/animation.gif'; 
@@ -67,81 +66,87 @@ function WalletInterface() {
   }, []);
 
   return (
-    <div className="terminal-v1-1" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.9)), url(${fundoImg})`}}>
-      <header className="main-nav">
-        <div className="brand"><img src={logoImg} alt="logo" /></div>
-        <div className="terminal-id">NEURA PRO TERMINAL v1.1</div>
-        <div className="auth-area"><ConnectButton label="CONNECT" /></div>
+    <div className="app-viewport" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.9)), url(${fundoImg})`}}>
+      <header className="terminal-header">
+        <div className="brand-box"><img src={logoImg} alt="logo" /></div>
+        <div className="header-title">NEURA PRO TERMINAL v1.1</div>
+        <div className="header-wallet"><ConnectButton label="CONNECT" /></div>
       </header>
 
-      <div className="content-container">
-        {/* ESQUERDA */}
-        <div className="side-col">
-          <div className="glass-panel">
-            <h2 className="label-tag">SWAP ENGINE</h2>
-            <div className="swap-logic">
-              <label className="min-label">ORIGIN</label>
-              <select className="ui-field"><option>ANKR</option></select>
-              <input type="number" className="ui-field" placeholder="0.00" value={swapAmount} onChange={e => setSwapAmount(e.target.value)} />
-              <div className="ui-arrow">⇅</div>
-              <label className="min-label">DESTINATION</label>
-              <select className="ui-field"><option>BTC</option></select>
-              <div className="ui-readonly">{swapAmount ? (swapAmount * 0.00000004).toFixed(8) : "0.0000"}</div>
-              <button className="neon-btn">EXECUTE</button>
+      <main className="terminal-main">
+        {/* LADO ESQUERDO */}
+        <aside className="column left">
+          <section className="panel swap-section">
+            <h3 className="panel-label">SWAP ENGINE</h3>
+            <div className="swap-content">
+              <div className="field-box">
+                <label>FROM</label>
+                <select className="input-tiny"><option>ANKR</option></select>
+                <input type="number" className="input-tiny" placeholder="0.00" value={swapAmount} onChange={e => setSwapAmount(e.target.value)} />
+              </div>
+              <div className="swap-divider">⇅</div>
+              <div className="field-box">
+                <label>TO</label>
+                <select className="input-tiny"><option>BTC</option></select>
+                <div className="readonly-box">{swapAmount ? (swapAmount * 0.00000004).toFixed(8) : "0.00"}</div>
+              </div>
+              <button className="btn-neon">EXECUTE</button>
             </div>
-          </div>
-          <div className="glass-panel">
-            <h2 className="label-tag">TRANSFER</h2>
-            <input className="ui-field" placeholder="Qty..." />
-            <input className="ui-field" placeholder="0x..." />
-            <button className="neon-btn">SEND</button>
-          </div>
-        </div>
+          </section>
 
-        {/* CENTRO */}
-        <div className="center-col">
-          <div className="asset-bar">
-            <span className="min-label">ASSET:</span>
-            <select className="asset-select" value={selectedAsset.symbol} onChange={(e) => setSelectedAsset(ASSETS_LIST.find(a => a.symbol === e.target.value))}>
+          <section className="panel transfer-section">
+            <h3 className="panel-label">TRANSFER</h3>
+            <input className="input-tiny" placeholder="Amount..." />
+            <input className="input-tiny" placeholder="Address..." />
+            <button className="btn-neon">SEND</button>
+          </section>
+        </aside>
+
+        {/* CENTRO (GRÁFICO) */}
+        <section className="column center">
+          <div className="asset-selector-header">
+            <span className="text-dim">ASSET:</span>
+            <select className="select-asset-main" value={selectedAsset.symbol} onChange={(e) => setSelectedAsset(ASSETS_LIST.find(a => a.symbol === e.target.value))}>
               {ASSETS_LIST.map(a => (
                 <option key={a.symbol} value={a.symbol}>{a.symbol} - ${prices[a.id]?.usd || '0.00'}</option>
               ))}
             </select>
-            <div className="asset-status">LIVE: <span className="neon">{selectedAsset.symbol}</span></div>
           </div>
-          <div className="chart-wrapper">
+          <div className="chart-container-box">
             <iframe 
               src={`https://s.tradingview.com/widgetembed/?symbol=${selectedAsset.pair}&interval=D&theme=dark`} 
-              width="100%" height="100%" frameBorder="0" title="tv"
+              width="100%" height="100%" frameBorder="0" title="tv-chart"
             ></iframe>
           </div>
-        </div>
+        </section>
 
-        {/* DIREITA */}
-        <div className="side-col">
-          <div className="glass-panel">
-            <h2 className="label-tag">WALLET</h2>
-            <div className="wallet-info">
-              <div className="small-txt">{isConnected ? `${address.slice(0,6)}...${address.slice(-4)}` : 'DISCONNECTED'}</div>
-              <div className="neon">ANKR: 1,250.00</div>
+        {/* LADO DIREITO */}
+        <aside className="column right">
+          <section className="panel wallet-section">
+            <h3 className="panel-label">WALLET</h3>
+            <div className="wallet-row">
+              <div className="addr-txt">{isConnected ? `${address.slice(0,6)}...${address.slice(-4)}` : 'DISCONNECTED'}</div>
+              <div className="neon-txt">ANKR: 1,250.00</div>
             </div>
-          </div>
-          <div className="glass-panel flex-grow">
-            <h2 className="label-tag">COLLECTIONS</h2>
-            <div className="empty-msg">NO DATA</div>
-          </div>
-          <div className="glass-panel">
-            <h2 className="label-tag">MONITOR</h2>
-            <img src={animationGif} alt="monitor" className="mon-gif" />
-            <div className="mon-time">{time}</div>
-          </div>
-        </div>
-      </div>
+          </section>
 
-      <footer className="footer-ticker">
-        <div className="ticker-scroll">
+          <section className="panel collections-section">
+            <h3 className="panel-label">COLLECTIONS</h3>
+            <div className="empty-center">NO NFTS</div>
+          </section>
+
+          <section className="panel monitor-section">
+            <h3 className="panel-label">MONITOR</h3>
+            <img src={animationGif} alt="monitor" className="gif-tiny" />
+            <div className="time-txt">{time}</div>
+          </section>
+        </aside>
+      </main>
+
+      <footer className="terminal-footer">
+        <div className="ticker-container">
           {ASSETS_LIST.concat(ASSETS_LIST).map((a, i) => (
-            <span key={i} className="ticker-box">{a.symbol}: <span className="neon">${prices[a.id]?.usd?.toFixed(2) || '0.00'}</span></span>
+            <span key={i} className="ticker-unit">{a.symbol}: <span className="neon-txt">${prices[a.id]?.usd?.toFixed(2) || '0.00'}</span></span>
           ))}
         </div>
       </footer>
