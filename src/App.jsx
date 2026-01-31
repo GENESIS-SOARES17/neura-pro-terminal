@@ -8,10 +8,10 @@ import { parseEther } from 'viem';
 import '@rainbow-me/rainbowkit/styles.css';
 import './App.css';
 
-// Importação corrigida conforme sua pasta de assets
+// Importações corrigidas
 import fundoImg from './assets/fundo.jpg';
 import logoImg from './assets/logo.png';
-import animationGif from './assets/animation .gif'; // Note o espaço antes do .gif
+import animationGif from './assets/animation.gif'; // ESPAÇO REMOVIDO AQUI
 
 const neuraTestnet = {
   id: 267,
@@ -144,9 +144,9 @@ function WalletInterface() {
           </div>
 
           <div className="glass-panel ultra-transp compact animation-box" style={{marginTop: '10px'}}>
-             <h2 className="rect-title">SYS MONITOR</h2>
-             <img src={animationGif} alt="Animation" className="side-gif" />
-             <div className="live-clock-terminal">SYS_TIME: {time}</div>
+              <h2 className="rect-title">SYS MONITOR</h2>
+              <img src={animationGif} alt="Animation" className="side-gif" />
+              <div className="live-clock-terminal">SYS_TIME: {time}</div>
           </div>
         </div>
       </div>
