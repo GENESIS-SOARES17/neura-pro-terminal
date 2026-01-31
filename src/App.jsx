@@ -27,7 +27,6 @@ const config = getDefaultConfig({
 
 const queryClient = new QueryClient();
 
-// Lista completa de ativos para o Dropdown
 const ASSETS_LIST = [
   { symbol: 'ANKR', id: 'ankr', pair: 'BINANCE:ANKRUSDT' },
   { symbol: 'BTC', id: 'bitcoin', pair: 'BITSTAMP:BTCUSD' },
@@ -67,105 +66,82 @@ function WalletInterface() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleAssetChange = (e) => {
-    const asset = ASSETS_LIST.find(a => a.symbol === e.target.value);
-    setSelectedAsset(asset);
-  };
-
   return (
     <div className="terminal-v1-1" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.9)), url(${fundoImg})`}}>
-      <div className="crt-effect"></div>
-      
       <header className="main-nav">
         <div className="brand"><img src={logoImg} alt="logo" /></div>
         <div className="terminal-id">NEURA PRO TERMINAL v1.1</div>
         <div className="auth-area"><ConnectButton label="CONNECT" /></div>
       </header>
 
-      <main className="dashboard-grid">
-        {/* COLUNA ESQUERDA */}
-        <aside className="panel-side">
-          <section className="glass-panel swap-engine">
+      <div className="content-container">
+        {/* ESQUERDA */}
+        <div className="side-col">
+          <div className="glass-panel">
             <h2 className="label-tag">SWAP ENGINE</h2>
             <div className="swap-logic">
-              <div className="input-box">
-                <label>ORIGIN</label>
-                <select className="ui-select"><option>ANKR</option></select>
-                <input type="number" className="ui-num" placeholder="0.00" value={swapAmount} onChange={e => setSwapAmount(e.target.value)} />
-              </div>
+              <label className="min-label">ORIGIN</label>
+              <select className="ui-field"><option>ANKR</option></select>
+              <input type="number" className="ui-field" placeholder="0.00" value={swapAmount} onChange={e => setSwapAmount(e.target.value)} />
               <div className="ui-arrow">⇅</div>
-              <div className="input-box">
-                <label>DESTINATION</label>
-                <select className="ui-select"><option>BTC</option></select>
-                <div className="ui-readonly">{swapAmount ? (swapAmount * 0.00000004).toFixed(8) : "0.00000000"}</div>
-              </div>
-              <button className="ui-btn neon-fill">EXECUTE SWAP</button>
+              <label className="min-label">DESTINATION</label>
+              <select className="ui-field"><option>BTC</option></select>
+              <div className="ui-readonly">{swapAmount ? (swapAmount * 0.00000004).toFixed(8) : "0.0000"}</div>
+              <button className="neon-btn">EXECUTE</button>
             </div>
-          </section>
-
-          <section className="glass-panel">
+          </div>
+          <div className="glass-panel">
             <h2 className="label-tag">TRANSFER</h2>
-            <input className="ui-num" placeholder="Qty..." />
-            <input className="ui-num" placeholder="Recipient 0x..." />
-            <button className="ui-btn">SEND ASSETS</button>
-          </section>
-        </aside>
+            <input className="ui-field" placeholder="Qty..." />
+            <input className="ui-field" placeholder="0x..." />
+            <button className="neon-btn">SEND</button>
+          </div>
+        </div>
 
-        {/* CENTRO: NOVO SELETOR DE ATIVOS E GRÁFICO */}
-        <section className="panel-center">
-          <div className="asset-selector-bar">
-            <div className="selector-label">SELECT ASSET:</div>
-            <select className="asset-dropdown" value={selectedAsset.symbol} onChange={handleAssetChange}>
+        {/* CENTRO */}
+        <div className="center-col">
+          <div className="asset-bar">
+            <span className="min-label">ASSET:</span>
+            <select className="asset-select" value={selectedAsset.symbol} onChange={(e) => setSelectedAsset(ASSETS_LIST.find(a => a.symbol === e.target.value))}>
               {ASSETS_LIST.map(a => (
-                <option key={a.symbol} value={a.symbol}>
-                  {a.symbol} - ${prices[a.id]?.usd || '0.00'}
-                </option>
+                <option key={a.symbol} value={a.symbol}>{a.symbol} - ${prices[a.id]?.usd || '0.00'}</option>
               ))}
             </select>
-            <div className="selected-info">
-              VIEWING: <span className="neon-text">{selectedAsset.symbol}</span>
-            </div>
+            <div className="asset-status">LIVE: <span className="neon">{selectedAsset.symbol}</span></div>
           </div>
-          <div className="glass-panel chart-box">
+          <div className="chart-wrapper">
             <iframe 
               src={`https://s.tradingview.com/widgetembed/?symbol=${selectedAsset.pair}&interval=D&theme=dark`} 
-              width="100%" 
-              height="100%" 
-              frameBorder="0" 
-              title="tv"
+              width="100%" height="100%" frameBorder="0" title="tv"
             ></iframe>
           </div>
-        </section>
+        </div>
 
-        {/* COLUNA DIREITA */}
-        <aside className="panel-side">
-          <section className="glass-panel">
-            <h2 className="label-tag">WALLET INFO</h2>
-            <div className="wallet-data">
-              <div className="text-small">{isConnected ? address : 'NOT CONNECTED'}</div>
-              <div className="text-neon">ANKR: 1,250.00</div>
+        {/* DIREITA */}
+        <div className="side-col">
+          <div className="glass-panel">
+            <h2 className="label-tag">WALLET</h2>
+            <div className="wallet-info">
+              <div className="small-txt">{isConnected ? `${address.slice(0,6)}...${address.slice(-4)}` : 'DISCONNECTED'}</div>
+              <div className="neon">ANKR: 1,250.00</div>
             </div>
-          </section>
-
-          <section className="glass-panel flex-grow">
+          </div>
+          <div className="glass-panel flex-grow">
             <h2 className="label-tag">COLLECTIONS</h2>
-            <div className="centered-msg">NO NFTS FOUND</div>
-          </section>
+            <div className="empty-msg">NO DATA</div>
+          </div>
+          <div className="glass-panel">
+            <h2 className="label-tag">MONITOR</h2>
+            <img src={animationGif} alt="monitor" className="mon-gif" />
+            <div className="mon-time">{time}</div>
+          </div>
+        </div>
+      </div>
 
-          <section className="glass-panel">
-            <h2 className="label-tag">SYS MONITOR</h2>
-            <img src={animationGif} alt="sys" className="sys-gif" />
-            <div className="sys-clock">TIME: {time}</div>
-          </section>
-        </aside>
-      </main>
-
-      <footer className="footer-bar">
-        <div className="ticker-wrap">
+      <footer className="footer-ticker">
+        <div className="ticker-scroll">
           {ASSETS_LIST.concat(ASSETS_LIST).map((a, i) => (
-            <div key={i} className="ticker-item">
-              {a.symbol}: <span className="neon-text">${prices[a.id]?.usd?.toFixed(2) || '0.00'}</span>
-            </div>
+            <span key={i} className="ticker-box">{a.symbol}: <span className="neon">${prices[a.id]?.usd?.toFixed(2) || '0.00'}</span></span>
           ))}
         </div>
       </footer>
