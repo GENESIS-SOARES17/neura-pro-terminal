@@ -2,203 +2,205 @@
 :root {
   --neon-green: #adff2f;
   --dark-bg: #0a0a0a;
-  --glass-bg: rgba(20, 20, 20, 0.7);
+  --glass-bg: rgba(10, 10, 10, 0.85);
   --border-color: rgba(173, 255, 47, 0.3);
 }
 
-body {
+* {
+  box-sizing: border-box; /* Garante que padding não aumente o tamanho dos elementos */
+}
+
+body, html {
   margin: 0;
   padding: 0;
   background-color: var(--dark-bg);
   color: #fff;
   font-family: 'Courier New', Courier, monospace;
-  overflow-x: hidden;
+  overflow: hidden; /* TRAVA A TELA PARA NÃO TER ROLAGEM */
+  height: 100vh;
+  width: 100vw;
 }
 
 .layout-personalizado {
-  min-height: 100vh;
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  height: 100vh;
+  width: 100vw;
   display: flex;
   flex-direction: column;
+  background-size: cover;
+  background-position: center;
 }
 
 /* --- NAVBAR --- */
 .navbar {
+  height: 50px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 30px;
-  background: rgba(0, 0, 0, 0.8);
-  border-bottom: 2px solid var(--neon-green);
-  box-shadow: 0 0 15px rgba(173, 255, 47, 0.2);
+  padding: 0 20px;
+  background: #000;
+  border-bottom: 1px solid var(--neon-green);
+  flex-shrink: 0;
 }
 
-.minha-logo {
-  height: 40px;
-  filter: drop-shadow(0 0 5px var(--neon-green));
-}
+.minha-logo { height: 30px; }
+.terminal-id { color: var(--neon-green); font-size: 0.8rem; letter-spacing: 1px; }
 
-.terminal-id {
-  color: var(--neon-green);
-  font-weight: bold;
-  letter-spacing: 2px;
-  text-shadow: 0 0 8px var(--neon-green);
-}
-
-/* --- GRID PRINCIPAL --- */
+/* --- GRID PRINCIPAL (SEM ROLAGEM) --- */
 .main-grid-layout {
   display: grid;
-  grid-template-columns: 300px 1fr 300px;
-  gap: 15px;
-  padding: 20px;
+  grid-template-columns: 260px 1fr 260px; /* Laterais fixas, Centro elástico */
+  gap: 10px;
+  padding: 10px;
   flex: 1;
+  min-height: 0; /* Permite que os itens internos encolham */
+  overflow: hidden;
 }
 
-/* --- PAINÉIS GLASSMORFISMO --- */
-.glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+/* --- COLUNAS LATERAIS --- */
+.side-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
 }
 
-.rect-title {
-  color: var(--neon-green);
-  font-size: 0.9rem;
-  margin-top: 0;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 5px;
-  margin-bottom: 15px;
-  text-transform: uppercase;
-}
-
-/* --- SELETOR DE ATIVOS (BOTÕES EM UMA LINHA SÓ) --- */
+/* --- SELETOR DE ATIVOS (TODOS EM UMA LINHA) --- */
 .chart-selector-grid {
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap; /* FORÇA TODOS NA MESMA LINHA */
-  gap: 5px;
+  flex-wrap: nowrap; /* PROIBIDO PULAR LINHA */
+  gap: 2px;
   width: 100%;
-  margin-bottom: 15px;
-  overflow-x: hidden; /* ESCONDE BARRA DE ROLAGEM */
+  margin-bottom: 8px;
 }
 
 .btn-chart-normal, .btn-chart-active {
-  flex: 1; /* DISTRIBUI ESPAÇO IGUALMENTE */
-  min-width: 0; /* PERMITE ENCOLHER ALÉM DO TEXTO */
-  padding: 8px 2px;
-  font-size: 0.7rem; /* LETRA MENOR PARA CABER TUDO */
-  font-family: 'Courier New', monospace;
+  flex: 1; /* Divide o espaço igualmente */
+  min-width: 0; /* Permite que o botão fique bem pequeno se necessário */
+  padding: 6px 0;
+  font-size: 0.6rem; /* Fonte pequena para caber os 12 nomes */
+  font-family: inherit;
   cursor: pointer;
-  background: rgba(0, 0, 0, 0.5);
-  color: #ccc;
+  background: rgba(0, 0, 0, 0.6);
+  color: #888;
   border: 1px solid var(--border-color);
-  transition: all 0.3s ease;
+  text-align: center;
   white-space: nowrap;
-  text-overflow: ellipsis;
   overflow: hidden;
 }
 
 .btn-chart-active {
   background: var(--neon-green);
   color: #000;
-  box-shadow: 0 0 15px var(--neon-green);
-  font-weight: bold;
+  box-shadow: 0 0 8px var(--neon-green);
   border-color: #fff;
+  font-weight: bold;
 }
 
-.btn-chart-normal:hover {
-  border-color: var(--neon-green);
-  color: var(--neon-green);
+/* --- PAINÉIS --- */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(5px);
+  border: 1px solid var(--border-color);
+  padding: 10px;
+  border-radius: 4px;
 }
 
-/* --- GRÁFICO --- */
+.center-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Evita que o gráfico estique a tela */
+}
+
 .chart-wrapper {
-  height: 500px;
-  overflow: hidden;
-  margin-bottom: 15px;
+  flex: 1;
+  background: #000;
+  border: 1px solid var(--border-color);
+  position: relative;
 }
 
 .graph-iframe {
+  width: 100%;
+  height: 100%;
   border: none;
 }
 
-.main-title {
-  text-align: center;
-  font-size: 2.5rem;
+/* --- ELEMENTOS DE INTERFACE --- */
+.rect-title {
   color: var(--neon-green);
-  text-shadow: 0 0 20px rgba(173, 255, 47, 0.5);
-  margin: 10px 0;
+  font-size: 0.7rem;
+  margin: 0 0 8px 0;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 3px;
 }
 
-/* --- CAMPOS DE INPUT E BOTÕES --- */
+.main-title {
+  font-size: 1.1rem;
+  color: var(--neon-green);
+  text-align: center;
+  margin: 5px 0;
+  text-transform: uppercase;
+}
+
 .input-field-transp {
   width: 100%;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-color);
   color: #fff;
-  padding: 10px;
-  margin-bottom: 10px;
-  box-sizing: border-box;
-  font-family: inherit;
+  padding: 6px;
+  margin-bottom: 6px;
+  font-size: 0.75rem;
 }
 
 .btn-neon {
   width: 100%;
-  padding: 12px;
+  padding: 8px;
   background: transparent;
   color: var(--neon-green);
   border: 1px solid var(--neon-green);
-  cursor: pointer;
+  font-size: 0.75rem;
   font-weight: bold;
-  text-transform: uppercase;
-  transition: 0.3s;
+  cursor: pointer;
 }
 
 .btn-neon:hover {
   background: var(--neon-green);
   color: #000;
-  box-shadow: 0 0 20px var(--neon-green);
 }
 
-/* --- STATUS E MONITOR --- */
-.status-display {
-  margin-top: 10px;
-  font-size: 0.8rem;
-  text-align: center;
+/* --- MONITOR E ANIMAÇÃO --- */
+.animation-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .side-gif {
   width: 100%;
-  height: auto;
-  border: 1px solid var(--border-color);
-  margin: 10px 0;
+  max-height: 100px;
+  object-fit: contain;
+  margin: 5px 0;
+  opacity: 0.8;
 }
 
 .live-clock-terminal {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: var(--neon-green);
-  text-align: center;
 }
 
-/* --- TICKER DE PREÇOS (FOOTER) --- */
+/* --- TICKER DE RODAPÉ --- */
 .footer-ticker-bar {
-  background: rgba(0, 0, 0, 0.9);
+  height: 30px;
+  background: #000;
   border-top: 1px solid var(--neon-green);
-  height: 40px;
   display: flex;
   align-items: center;
-  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .ticker-track {
   display: flex;
-  white-space: nowrap;
-  animation: ticker-move 40s linear infinite;
+  animation: ticker-move 30s linear infinite;
 }
 
 @keyframes ticker-move {
@@ -208,18 +210,9 @@ body {
 
 .ticker-item {
   display: flex;
-  align-items: center;
-  padding: 0 20px;
-  font-size: 0.85rem;
+  padding: 0 15px;
+  font-size: 0.7rem;
+  white-space: nowrap;
 }
 
-.asset-name { color: var(--neon-green); margin-right: 5px; }
-.asset-price { color: #fff; }
-.ticker-bullet { margin-left: 15px; color: var(--border-color); }
-
-/* --- RESPONSIVIDADE --- */
-@media (max-width: 1024px) {
-  .main-grid-layout {
-    grid-template-columns: 1fr;
-  }
-}
+.asset-name { color: var(--neon-green); margin-right: 4px; }
