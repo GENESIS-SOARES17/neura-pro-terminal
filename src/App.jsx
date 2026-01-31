@@ -57,30 +57,16 @@ function WalletInterface() {
         const ids = ASSETS.map(a => a.id).join(',');
         const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
         setPrices(res.data);
-        
-        // Se não houver seleção manual, o modo automático escolhe a melhor gema
         if (!selectedGem) {
-          let best = Object.entries(res.data)
-            .map(([id, val]) => ({ id, change: val.usd_24h_change || 0 }))
-            .sort((a, b) => b.change - a.change)[0];
+          let best = Object.entries(res.data).map(([id, val]) => ({ id, change: val.usd_24h_change || 0 })).sort((a, b) => b.change - a.change)[0];
           const gem = ASSETS.find(a => a.id === best.id);
           setSelectedGem({ ...gem, change: best.change, isAuto: true });
-        } else {
-          // Atualiza o preço da gema selecionada
-          const currentChange = res.data[selectedGem.id]?.usd_24h_change || 0;
-          setSelectedGem(prev => ({ ...prev, change: currentChange }));
         }
       } catch (e) { console.error(e); }
     };
     fetchPrices();
-    const interval = setInterval(fetchPrices, 30000);
-    return () => { clearInterval(timer); clearInterval(interval); };
+    return () => clearInterval(timer);
   }, [selectedGem?.id]);
-
-  const handleManualSelect = (asset) => {
-    setChartSymbol(asset.pair);
-    setSelectedGem({ ...asset, change: prices[asset.id]?.usd_24h_change || 0, isAuto: false });
-  };
 
   return (
     <div className="layout-personalizado" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url(${fundoImg})`}}>
@@ -93,20 +79,24 @@ function WalletInterface() {
       </header>
 
       <div className="main-content-area">
-        {/* COLUNA ESQUERDA: SWAP E TRANSFER */}
+        {/* LADO ESQUERDO: SWAP ENGINE COMPLETO */}
         <aside className="side-panel">
-          <section className="glass-panel swap-engine">
+          <section className="glass-panel swap-panel">
             <h2 className="panel-title">SWAP ENGINE</h2>
-            <div className="box-section">
-              <label>ORIGIN</label>
-              <select className="ui-input"><option>ANKR</option></select>
-              <input type="number" className="ui-input" placeholder="0.00" value={swapAmount} onChange={e => setSwapAmount(e.target.value)} />
+            <div className="swap-box">
+              <div className="input-row">
+                <label>ORIGIN</label>
+                <select className="ui-input"><option>ANKR</option></select>
+                <input type="number" className="ui-input" placeholder="0.00" value={swapAmount} onChange={e => setSwapAmount(e.target.value)} />
+              </div>
               
-              <div className="swap-divider">⇅</div>
+              <div className="swap-icon-row">⇅</div>
               
-              <label>DESTINATION</label>
-              <select className="ui-input"><option>BTC</option></select>
-              <div className="result-display">{swapAmount ? (swapAmount * 0.98).toFixed(6) : "0.0000"}</div>
+              <div className="input-row">
+                <label>DESTINATION</label>
+                <select className="ui-input"><option>BTC</option></select>
+                <div className="swap-result">{swapAmount ? (swapAmount * 0.98).toFixed(6) : "0.0000"}</div>
+              </div>
               
               <button className="ui-btn neon-btn">EXECUTE SWAP</button>
             </div>
@@ -114,7 +104,7 @@ function WalletInterface() {
 
           <section className="glass-panel">
             <h2 className="panel-title">TRANSFER</h2>
-            <div className="box-section">
+            <div className="input-group">
               <input className="ui-input" placeholder="Qty..." />
               <input className="ui-input" placeholder="Recipient 0x..." />
               <button className="ui-btn">SEND ASSETS</button>
@@ -122,11 +112,11 @@ function WalletInterface() {
           </section>
         </aside>
 
-        {/* CENTRO: GRÁFICO E BOTÕES */}
+        {/* CENTRO: GRÁFICO */}
         <main className="chart-main">
           <div className="asset-bar">
             {ASSETS.map(a => (
-              <button key={a.symbol} onClick={() => handleManualSelect(a)} className={chartSymbol === a.pair ? 'tab-active' : 'tab-normal'}>
+              <button key={a.symbol} onClick={() => { setChartSymbol(a.pair); setSelectedGem({...a, change: prices[a.id]?.usd_24h_change || 0, isAuto: false})}} className={chartSymbol === a.pair ? 'tab-active' : 'tab-normal'}>
                 {a.symbol}
               </button>
             ))}
@@ -134,7 +124,7 @@ function WalletInterface() {
           
           <div className="glass-panel chart-container">
             {selectedGem && (
-              <div className="gem-badge" onClick={() => setSelectedGem(null)} title="Click to Reset to Auto">
+              <div className="gem-badge" onClick={() => setSelectedGem(null)}>
                 <span className="dot-blink"></span>
                 {selectedGem.isAuto ? 'TOP_GEM' : 'WATCHING'}: {selectedGem.symbol} ({selectedGem.change.toFixed(2)}%)
               </div>
@@ -143,31 +133,31 @@ function WalletInterface() {
           </div>
         </main>
 
-        {/* COLUNA DIREITA: WALLET E COLLECTIONS */}
+        {/* LADO DIREITO: WALLET E COLLECTIONS */}
         <aside className="side-panel">
           <section className="glass-panel">
             <h2 className="panel-title">WALLET INFO</h2>
-            <div className="wallet-data">
+            <div className="wallet-info">
               <div className="addr">{isConnected ? `${address.slice(0,10)}...${address.slice(-4)}` : 'DISCONNECTED'}</div>
-              <div className="balance-item">ANKR: <span className="neon-txt">1,250.00</span></div>
+              <div className="bal">ANKR: <span className="neon-txt">1,250.00</span></div>
             </div>
           </section>
 
-          <section className="glass-panel collections-area">
+          <section className="glass-panel collections-panel">
             <h2 className="panel-title">COLLECTIONS</h2>
-            <div className="nft-grid">NO NFTS FOUND</div>
+            <div className="collections-placeholder">NO NFTS FOUND</div>
           </section>
 
-          <section className="glass-panel monitor-section">
+          <section className="glass-panel monitor-panel">
             <h2 className="panel-title">SYS MONITOR</h2>
-            <img src={animationGif} alt="Monitor" className="monitor-gif" />
-            <div className="sys-time">SYS_TIME: {time}</div>
+            <img src={animationGif} alt="Monitor" className="side-gif" />
+            <div className="time-display">TIME: {time}</div>
           </section>
         </aside>
       </div>
 
       <footer className="ticker-footer">
-        <div className="ticker-wrapper">
+        <div className="ticker-track">
           {[...ASSETS, ...ASSETS].map((asset, i) => (
             <div key={i} className="ticker-item">
               <span className="t-name">{asset.symbol}</span>
