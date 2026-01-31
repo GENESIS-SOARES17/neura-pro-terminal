@@ -26,7 +26,6 @@ const config = getDefaultConfig({
 
 const queryClient = new QueryClient();
 
-// Lista de Ativos Atualizada com USDC e USDT
 const ASSETS_LIST = [
   { symbol: 'ANKR', id: 'ankr', pair: 'BINANCE:ANKRUSDT' },
   { symbol: 'USDC', id: 'usd-coin', pair: 'BINANCE:USDCUSDT' },
@@ -35,15 +34,9 @@ const ASSETS_LIST = [
   { symbol: 'ETH', id: 'ethereum', pair: 'BITSTAMP:ETHUSD' },
   { symbol: 'SOL', id: 'solana', pair: 'BINANCE:SOLUSDT' },
   { symbol: 'HYPE', id: 'hyperliquid', pair: 'BYBIT:HYPEUSDT' },
-  { symbol: 'AVAX', id: 'avalanche-2', pair: 'BINANCE:AVAXUSDT' },
   { symbol: 'SUI', id: 'sui', pair: 'BINANCE:SUIUSDT' },
-  { symbol: 'JUP', id: 'jupiter-exchange-solana', pair: 'BINANCE:JUPUSDT' },
-  { symbol: 'XLM', id: 'stellar', pair: 'BINANCE:XLMUSDT' },
-  { symbol: 'DOT', id: 'polkadot', pair: 'BINANCE:DOTUSDT' },
-  { symbol: 'BNB', id: 'binancecoin', pair: 'BINANCE:BNBUSDT' },
-  { symbol: 'XRP', id: 'ripple', pair: 'BINANCE:XRPUSDT' },
-  { symbol: 'ADA', id: 'cardano', pair: 'BINANCE:ADAUSDT' },
-  { symbol: 'TRX', id: 'tron', pair: 'BINANCE:TRXUSDT' }
+  { symbol: 'AVAX', id: 'avalanche-2', pair: 'BINANCE:AVAXUSDT' },
+  { symbol: 'XRP', id: 'ripple', pair: 'BINANCE:XRPUSDT' }
 ];
 
 function WalletInterface() {
@@ -51,10 +44,8 @@ function WalletInterface() {
   const [selectedChartAsset, setSelectedChartAsset] = useState(ASSETS_LIST[0]);
   const [prices, setPrices] = useState({});
   const [time, setTime] = useState(new Date().toLocaleTimeString());
-
-  // Estados do Swap
   const [swapOrigin, setSwapOrigin] = useState(ASSETS_LIST[0]); 
-  const [swapDest, setSwapDest] = useState(ASSETS_LIST[1]); // Começa com USDC como destino
+  const [swapDest, setSwapDest] = useState(ASSETS_LIST[1]); 
   const [swapAmount, setSwapAmount] = useState('');
 
   useEffect(() => {
@@ -71,18 +62,15 @@ function WalletInterface() {
     return () => { clearInterval(timer); clearInterval(priceTimer); };
   }, []);
 
-  // Cálculo do valor em Dólar da entrada
   const getInputValueInUSD = () => {
     if (!swapAmount || !prices[swapOrigin.id]) return "0.00";
     return (swapAmount * prices[swapOrigin.id].usd).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  // Cálculo do retorno estimado (Quanto vai receber do outro ativo)
   const getEstimatedReturn = () => {
     if (!swapAmount || !prices[swapOrigin.id] || !prices[swapDest.id]) return "0.000000";
     const totalUSD = swapAmount * prices[swapOrigin.id].usd;
-    const result = totalUSD / prices[swapDest.id].usd;
-    return result.toFixed(6);
+    return (totalUSD / prices[swapDest.id].usd).toFixed(6);
   };
 
   return (
@@ -98,50 +86,46 @@ function WalletInterface() {
           <section className="panel swap-section">
             <h3 className="panel-label">SWAP ENGINE</h3>
             <div className="swap-content">
-              {/* ORIGEM */}
               <div className="field-box">
                 <div className="field-header">
                   <label className="min-label">FROM</label>
-                  <span className="balance-label">VAL: ${getInputValueInUSD()}</span>
+                  <span className="balance-label">${getInputValueInUSD()}</span>
                 </div>
-                <div className="input-group">
-                  <select className="input-tiny" value={swapOrigin.symbol} onChange={(e) => setSwapOrigin(ASSETS_LIST.find(a => a.symbol === e.target.value))}>
+                <div className="input-group-row">
+                  <select className="input-tiny sel-mini" value={swapOrigin.symbol} onChange={(e) => setSwapOrigin(ASSETS_LIST.find(a => a.symbol === e.target.value))}>
                     {ASSETS_LIST.map(a => <option key={a.symbol} value={a.symbol}>{a.symbol}</option>)}
                   </select>
                   <input type="number" className="input-tiny main-val" placeholder="0.00" value={swapAmount} onChange={e => setSwapAmount(e.target.value)} />
                 </div>
               </div>
               
-              <div className="swap-divider" onClick={() => { const t = swapOrigin; setSwapOrigin(swapDest); setSwapDest(t); }}>⇅</div>
+              <div className="swap-divider-small" onClick={() => { const t = swapOrigin; setSwapOrigin(swapDest); setSwapDest(t); }}>⇅</div>
               
-              {/* DESTINO */}
               <div className="field-box">
-                <div className="field-header">
-                  <label className="min-label">TO (ESTIMATED)</label>
-                </div>
-                <div className="input-group">
-                  <select className="input-tiny" value={swapDest.symbol} onChange={(e) => setSwapDest(ASSETS_LIST.find(a => a.symbol === e.target.value))}>
+                <div className="field-header"><label className="min-label">TO</label></div>
+                <div className="input-group-row">
+                  <select className="input-tiny sel-mini" value={swapDest.symbol} onChange={(e) => setSwapDest(ASSETS_LIST.find(a => a.symbol === e.target.value))}>
                     {ASSETS_LIST.map(a => <option key={a.symbol} value={a.symbol}>{a.symbol}</option>)}
                   </select>
-                  <div className="readonly-box main-val">{getEstimatedReturn()}</div>
+                  <div className="readonly-box-compact">{getEstimatedReturn()}</div>
                 </div>
               </div>
-              <button className="btn-neon">EXECUTE SWAP</button>
+              <button className="btn-neon-compact">EXECUTE SWAP</button>
             </div>
           </section>
 
           <section className="panel transfer-section">
             <h3 className="panel-label">TRANSFER</h3>
-            <input className="input-tiny" placeholder="Qty..." />
-            <input className="input-tiny" placeholder="Recipient 0x..." />
-            <button className="btn-neon">SEND ASSETS</button>
+            <input className="input-tiny-mini" placeholder="Qty..." />
+            <input className="input-tiny-mini" placeholder="0x..." />
+            <button className="btn-neon-compact">SEND</button>
           </section>
         </aside>
 
         <section className="column center">
-          <div className="asset-selector-header">
-            <span className="text-dim">CHART:</span>
-            <select className="select-asset-main" value={selectedChartAsset.symbol} onChange={(e) => setSelectedChartAsset(ASSETS_LIST.find(a => a.symbol === e.target.value))}>
+          <div className="asset-selector-header-compact">
+            <span className="text-dim-mini">CHART:</span>
+            <select className="select-asset-main-mini" value={selectedChartAsset.symbol} onChange={(e) => setSelectedChartAsset(ASSETS_LIST.find(a => a.symbol === e.target.value))}>
               {ASSETS_LIST.map(a => (
                 <option key={a.symbol} value={a.symbol}>{a.symbol} - ${prices[a.id]?.usd?.toFixed(2) || '0.00'}</option>
               ))}
@@ -153,21 +137,17 @@ function WalletInterface() {
         </section>
 
         <aside className="column right">
-          <section className="panel wallet-section">
+          <section className="panel wallet-section-mini">
             <h3 className="panel-label">WALLET</h3>
-            <div className="wallet-row">
-              <div className="addr-txt">{isConnected ? `${address.slice(0,6)}...${address.slice(-4)}` : 'OFFLINE'}</div>
-              <div className="neon-txt">ANKR: 1,250.00</div>
+            <div className="wallet-row-mini">
+              <div className="addr-txt-mini">{isConnected ? `${address.slice(0,4)}...${address.slice(-4)}` : 'OFFLINE'}</div>
+              <div className="neon-txt-mini">ANKR: 1,250</div>
             </div>
           </section>
-          <section className="panel collections-section">
-            <h3 className="panel-label">COLLECTIONS</h3>
-            <div className="empty-center">NO DATA</div>
-          </section>
-          <section className="panel monitor-section">
+          <section className="panel monitor-section-mini">
             <h3 className="panel-label">MONITOR</h3>
-            <img src={animationGif} alt="monitor" className="gif-tiny" />
-            <div className="time-txt">{time}</div>
+            <img src={animationGif} alt="monitor" className="gif-tiny-mini" />
+            <div className="time-txt-mini">{time}</div>
           </section>
         </aside>
       </main>
