@@ -8,7 +8,6 @@ import { parseEther } from 'viem';
 import '@rainbow-me/rainbowkit/styles.css';
 import './App.css';
 
-// Assets
 import fundoImg from './assets/fundo.jpg';
 import logoImg from './assets/logo.png';
 import animationGif from './assets/animation.gif'; 
@@ -40,15 +39,7 @@ const ASSETS = [
   { symbol: 'TRX', id: 'tron', pair: 'BINANCE:TRXUSDT' },
   { symbol: 'SUI', id: 'sui', pair: 'BINANCE:SUIUSDT' },
   { symbol: 'POL', id: 'matic-network', pair: 'BINANCE:POLUSDT' },
-  { symbol: 'HYPE', id: 'hyperliquid', pair: 'BYBIT:HYPEUSDT' },
-  { symbol: 'AVAX', id: 'avalanche-2', pair: 'BINANCE:AVAXUSDT' },
-  { symbol: 'DOT', id: 'polkadot', pair: 'BINANCE:DOTUSDT' },
-  { symbol: 'LINK', id: 'chainlink', pair: 'BINANCE:LINKUSDT' },
-  { symbol: 'DOGE', id: 'dogecoin', pair: 'BINANCE:DOGEUSDT' },
-  { symbol: 'NEAR', id: 'near', pair: 'BINANCE:NEARUSDT' },
-  { symbol: 'APT', id: 'aptos', pair: 'BINANCE:APTUSDT' },
-  { symbol: 'UNI', id: 'uniswap', pair: 'BINANCE:UNIUSDT' },
-  { symbol: 'ARB', id: 'arbitrum', pair: 'BINANCE:ARBUSDT' },
+  { symbol: 'HYPE', id: 'hyperliquid', pair: 'BYBIT:HYPEUSDT' }
 ];
 
 function WalletInterface() {
@@ -56,13 +47,7 @@ function WalletInterface() {
   const [chartSymbol, setChartSymbol] = useState('BINANCE:ANKRUSDT');
   const [prices, setPrices] = useState({});
   const [selectedGem, setSelectedGem] = useState(null);
-  const [swapAmount, setSwapAmount] = useState('');
-  const [transfQty, setTransfQty] = useState('');
-  const [recipient, setRecipient] = useState('');
   const [time, setTime] = useState(new Date().toLocaleTimeString());
-
-  const { data: hash, sendTransaction, isPending } = useSendTransaction();
-  const { isLoading: isConfirming, isSuccess, isError } = useWaitForTransactionReceipt({ hash });
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date().toLocaleTimeString()), 1000);
@@ -71,11 +56,8 @@ function WalletInterface() {
         const ids = ASSETS.map(a => a.id).join(',');
         const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
         setPrices(res.data);
-        
         if (!selectedGem) {
-          let sorted = Object.entries(res.data)
-            .map(([id, val]) => ({ id, change: val.usd_24h_change || 0 }))
-            .sort((a, b) => b.change - a.change);
+          let sorted = Object.entries(res.data).map(([id, val]) => ({ id, change: val.usd_24h_change || 0 })).sort((a, b) => b.change - a.change);
           if (sorted.length > 0) {
             const gem = ASSETS.find(a => a.id === sorted[0].id);
             setSelectedGem({ ...gem, change: sorted[0].change });
@@ -88,96 +70,83 @@ function WalletInterface() {
     return () => { clearInterval(timer); clearInterval(interval); };
   }, [selectedGem?.id]);
 
-  const handleAssetClick = (asset) => {
-    setChartSymbol(asset.pair);
-    setSelectedGem({ ...asset, change: prices[asset.id]?.usd_24h_change || 0 });
-  };
-
   return (
-    <div className="layout-personalizado" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url(${fundoImg})`}}>
+    <div className="layout-personalizado" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url(${fundoImg})`}}>
       <div className="crt-overlay"></div>
       
-      <nav className="navbar">
-        <div className="logo-section">
+      <header className="navbar">
+        <div className="logo-container">
           <img src={logoImg} className="minha-logo" alt="logo" />
         </div>
-        <div className="terminal-id">NEURA PRO TERMINAL v1.1</div>
-        <div className="wallet-section">
-          <ConnectButton label="CONNECT" />
+        <div className="terminal-header-title">NEURA PRO TERMINAL v1.1</div>
+        <div className="nav-actions">
+          <ConnectButton label="CONNECT" accountStatus="address" showBalance={false} />
         </div>
-      </nav>
+      </header>
 
-      <div className="main-grid-layout">
-        <aside className="side-col left">
-          <div className="glass-panel">
-            <h2 className="rect-title">SWAP ENGINE</h2>
-            <div className="box-section">
-              <label className="bright-label">ORIGIN</label>
-              <select className="input-field-transp"><option>ANKR</option></select>
-              <input type="number" className="input-field-transp" placeholder="0.00" value={swapAmount} onChange={e => setSwapAmount(e.target.value)} />
-              <button className="btn-neon">EXECUTE SWAP</button>
+      <div className="main-content-area">
+        <aside className="side-panel">
+          <section className="glass-panel">
+            <h2 className="panel-title">SWAP</h2>
+            <div className="input-group">
+              <select className="ui-input"><option>ANKR</option></select>
+              <input type="number" className="ui-input" placeholder="0.00" />
+              <button className="ui-btn">EXECUTE</button>
             </div>
-          </div>
+          </section>
 
-          <div className="glass-panel">
-            <h2 className="rect-title">TRANSFER</h2>
-            <div className="box-section">
-              <input className="input-field-transp" placeholder="Recipient 0x..." onChange={e => setRecipient(e.target.value)} />
-              <button className="btn-neon" onClick={() => sendTransaction({ to: recipient, value: parseEther(transfQty) })}>
-                {isPending ? 'SENDING...' : 'SEND ASSETS'}
-              </button>
+          <section className="glass-panel">
+            <h2 className="panel-title">TRANSFER</h2>
+            <div className="input-group">
+              <input className="ui-input" placeholder="0x..." />
+              <button className="ui-btn">SEND</button>
             </div>
-          </div>
+          </section>
         </aside>
 
-        <main className="center-panel">
-          <div className="chart-header">
-            <div className="chart-selector-grid">
-              {ASSETS.slice(0, 10).map(a => (
-                <button key={a.symbol} onClick={() => handleAssetClick(a)} className={chartSymbol === a.pair ? 'btn-chart-active' : 'btn-chart-normal'}>
-                  {a.symbol}
-                </button>
-              ))}
-            </div>
+        <main className="chart-main">
+          <div className="asset-bar">
+            {ASSETS.map(a => (
+              <button key={a.symbol} onClick={() => setChartSymbol(a.pair)} className={chartSymbol === a.pair ? 'tab-active' : 'tab-normal'}>
+                {a.symbol}
+              </button>
+            ))}
           </div>
           
-          <div className="glass-panel chart-wrapper">
+          <div className="glass-panel chart-container">
             {selectedGem && (
-              <div className="gem-scanner-badge">
-                <span className="scanner-dot"></span>
+              <div className="gem-badge">
+                <div className="dot-blink"></div>
                 GEM: {selectedGem.symbol} ({selectedGem.change.toFixed(2)}%)
               </div>
             )}
-            <iframe src={`https://s.tradingview.com/widgetembed/?symbol=${chartSymbol}&interval=D&theme=dark`} width="100%" height="100%" frameBorder="0" className="graph-iframe" title="chart"></iframe>
+            <iframe src={`https://s.tradingview.com/widgetembed/?symbol=${chartSymbol}&interval=D&theme=dark`} width="100%" height="100%" frameBorder="0" title="chart"></iframe>
           </div>
-          <div className="terminal-footer-label">NEURA PRO TERMINAL CORE</div>
         </main>
 
-        <aside className="side-col right">
-          <div className="glass-panel">
-            <h2 className="rect-title">WALLET INFO</h2>
-            <div className="wallet-info-hub">
-              <div className="addr-txt">{isConnected ? `${address.slice(0,6)}...${address.slice(-4)}` : 'DISCONNECTED'}</div>
-              <div className="balance-item">ANKR: <span className="green-val">1,250.00</span></div>
+        <aside className="side-panel">
+          <section className="glass-panel">
+            <h2 className="panel-title">WALLET</h2>
+            <div className="wallet-data">
+              <div className="addr">{isConnected ? `${address.slice(0,6)}...${address.slice(-4)}` : 'OFFLINE'}</div>
+              <div className="balance">ANKR: <span className="neon-txt">1,250.00</span></div>
             </div>
-          </div>
+          </section>
 
-          <div className="glass-panel animation-box">
-              <h2 className="rect-title">SYS MONITOR</h2>
-              <div className="monitor-content">
-                <img src={animationGif} alt="Animation" className="side-gif" />
-                <div className="live-clock-terminal">{time}</div>
-              </div>
-          </div>
+          <section className="glass-panel monitor-section">
+            <h2 className="panel-title">MONITOR</h2>
+            <img src={animationGif} alt="Monitor" className="monitor-gif" />
+            <div className="sys-time">{time}</div>
+          </section>
         </aside>
       </div>
 
-      <footer className="footer-ticker-bar">
-        <div className="ticker-track">
-          {ASSETS.map((asset, index) => (
-            <div key={index} className="ticker-item">
-              <span className="asset-name">{asset.symbol}</span>
-              <span className="asset-price">${prices[asset.id]?.usd?.toFixed(2) || '0.00'}</span>
+      <footer className="ticker-footer">
+        <div className="ticker-wrapper">
+          {ASSETS.map((asset, i) => (
+            <div key={i} className="ticker-item">
+              <span className="t-name">{asset.symbol}</span>
+              <span className="t-price">${prices[asset.id]?.usd?.toFixed(2) || '0.00'}</span>
             </div>
           ))}
         </div>
