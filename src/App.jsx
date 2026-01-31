@@ -47,6 +47,7 @@ function WalletInterface() {
   const [chartSymbol, setChartSymbol] = useState('BINANCE:ANKRUSDT');
   const [prices, setPrices] = useState({});
   const [selectedGem, setSelectedGem] = useState(null);
+  const [swapAmount, setSwapAmount] = useState('');
   const [time, setTime] = useState(new Date().toLocaleTimeString());
 
   useEffect(() => {
@@ -56,12 +57,18 @@ function WalletInterface() {
         const ids = ASSETS.map(a => a.id).join(',');
         const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
         setPrices(res.data);
+        
+        // Se não houver seleção manual, o modo automático escolhe a melhor gema
         if (!selectedGem) {
-          let sorted = Object.entries(res.data).map(([id, val]) => ({ id, change: val.usd_24h_change || 0 })).sort((a, b) => b.change - a.change);
-          if (sorted.length > 0) {
-            const gem = ASSETS.find(a => a.id === sorted[0].id);
-            setSelectedGem({ ...gem, change: sorted[0].change });
-          }
+          let best = Object.entries(res.data)
+            .map(([id, val]) => ({ id, change: val.usd_24h_change || 0 }))
+            .sort((a, b) => b.change - a.change)[0];
+          const gem = ASSETS.find(a => a.id === best.id);
+          setSelectedGem({ ...gem, change: best.change, isAuto: true });
+        } else {
+          // Atualiza o preço da gema selecionada
+          const currentChange = res.data[selectedGem.id]?.usd_24h_change || 0;
+          setSelectedGem(prev => ({ ...prev, change: currentChange }));
         }
       } catch (e) { console.error(e); }
     };
@@ -70,44 +77,56 @@ function WalletInterface() {
     return () => { clearInterval(timer); clearInterval(interval); };
   }, [selectedGem?.id]);
 
+  const handleManualSelect = (asset) => {
+    setChartSymbol(asset.pair);
+    setSelectedGem({ ...asset, change: prices[asset.id]?.usd_24h_change || 0, isAuto: false });
+  };
+
   return (
     <div className="layout-personalizado" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url(${fundoImg})`}}>
       <div className="crt-overlay"></div>
       
       <header className="navbar">
-        <div className="logo-container">
-          <img src={logoImg} className="minha-logo" alt="logo" />
-        </div>
+        <div className="logo-container"><img src={logoImg} className="minha-logo" alt="logo" /></div>
         <div className="terminal-header-title">NEURA PRO TERMINAL v1.1</div>
-        <div className="nav-actions">
-          <ConnectButton label="CONNECT" accountStatus="address" showBalance={false} />
-        </div>
+        <div className="nav-actions"><ConnectButton label="CONNECT" /></div>
       </header>
 
       <div className="main-content-area">
+        {/* COLUNA ESQUERDA: SWAP E TRANSFER */}
         <aside className="side-panel">
-          <section className="glass-panel">
-            <h2 className="panel-title">SWAP</h2>
-            <div className="input-group">
+          <section className="glass-panel swap-engine">
+            <h2 className="panel-title">SWAP ENGINE</h2>
+            <div className="box-section">
+              <label>ORIGIN</label>
               <select className="ui-input"><option>ANKR</option></select>
-              <input type="number" className="ui-input" placeholder="0.00" />
-              <button className="ui-btn">EXECUTE</button>
+              <input type="number" className="ui-input" placeholder="0.00" value={swapAmount} onChange={e => setSwapAmount(e.target.value)} />
+              
+              <div className="swap-divider">⇅</div>
+              
+              <label>DESTINATION</label>
+              <select className="ui-input"><option>BTC</option></select>
+              <div className="result-display">{swapAmount ? (swapAmount * 0.98).toFixed(6) : "0.0000"}</div>
+              
+              <button className="ui-btn neon-btn">EXECUTE SWAP</button>
             </div>
           </section>
 
           <section className="glass-panel">
             <h2 className="panel-title">TRANSFER</h2>
-            <div className="input-group">
-              <input className="ui-input" placeholder="0x..." />
-              <button className="ui-btn">SEND</button>
+            <div className="box-section">
+              <input className="ui-input" placeholder="Qty..." />
+              <input className="ui-input" placeholder="Recipient 0x..." />
+              <button className="ui-btn">SEND ASSETS</button>
             </div>
           </section>
         </aside>
 
+        {/* CENTRO: GRÁFICO E BOTÕES */}
         <main className="chart-main">
           <div className="asset-bar">
             {ASSETS.map(a => (
-              <button key={a.symbol} onClick={() => setChartSymbol(a.pair)} className={chartSymbol === a.pair ? 'tab-active' : 'tab-normal'}>
+              <button key={a.symbol} onClick={() => handleManualSelect(a)} className={chartSymbol === a.pair ? 'tab-active' : 'tab-normal'}>
                 {a.symbol}
               </button>
             ))}
@@ -115,35 +134,41 @@ function WalletInterface() {
           
           <div className="glass-panel chart-container">
             {selectedGem && (
-              <div className="gem-badge">
-                <div className="dot-blink"></div>
-                GEM: {selectedGem.symbol} ({selectedGem.change.toFixed(2)}%)
+              <div className="gem-badge" onClick={() => setSelectedGem(null)} title="Click to Reset to Auto">
+                <span className="dot-blink"></span>
+                {selectedGem.isAuto ? 'TOP_GEM' : 'WATCHING'}: {selectedGem.symbol} ({selectedGem.change.toFixed(2)}%)
               </div>
             )}
             <iframe src={`https://s.tradingview.com/widgetembed/?symbol=${chartSymbol}&interval=D&theme=dark`} width="100%" height="100%" frameBorder="0" title="chart"></iframe>
           </div>
         </main>
 
+        {/* COLUNA DIREITA: WALLET E COLLECTIONS */}
         <aside className="side-panel">
           <section className="glass-panel">
-            <h2 className="panel-title">WALLET</h2>
+            <h2 className="panel-title">WALLET INFO</h2>
             <div className="wallet-data">
-              <div className="addr">{isConnected ? `${address.slice(0,6)}...${address.slice(-4)}` : 'OFFLINE'}</div>
-              <div className="balance">ANKR: <span className="neon-txt">1,250.00</span></div>
+              <div className="addr">{isConnected ? `${address.slice(0,10)}...${address.slice(-4)}` : 'DISCONNECTED'}</div>
+              <div className="balance-item">ANKR: <span className="neon-txt">1,250.00</span></div>
             </div>
           </section>
 
+          <section className="glass-panel collections-area">
+            <h2 className="panel-title">COLLECTIONS</h2>
+            <div className="nft-grid">NO NFTS FOUND</div>
+          </section>
+
           <section className="glass-panel monitor-section">
-            <h2 className="panel-title">MONITOR</h2>
+            <h2 className="panel-title">SYS MONITOR</h2>
             <img src={animationGif} alt="Monitor" className="monitor-gif" />
-            <div className="sys-time">{time}</div>
+            <div className="sys-time">SYS_TIME: {time}</div>
           </section>
         </aside>
       </div>
 
       <footer className="ticker-footer">
         <div className="ticker-wrapper">
-          {ASSETS.map((asset, i) => (
+          {[...ASSETS, ...ASSETS].map((asset, i) => (
             <div key={i} className="ticker-item">
               <span className="t-name">{asset.symbol}</span>
               <span className="t-price">${prices[asset.id]?.usd?.toFixed(2) || '0.00'}</span>
