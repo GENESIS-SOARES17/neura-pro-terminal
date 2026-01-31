@@ -2,7 +2,7 @@
   --neon: #adff2f;
   --bg-dark: #050505;
   --panel-bg: rgba(10, 10, 10, 0.95);
-  --border: rgba(173, 255, 47, 0.4);
+  --border: rgba(173, 255, 47, 0.35);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -13,13 +13,16 @@ body, html {
   font-family: 'Courier New', monospace;
   height: 100vh;
   width: 100vw;
-  overflow: hidden;
+  overflow: hidden; /* IMPEDE O SCROLL/ZOOM */
 }
 
 .layout-personalizado {
   height: 100vh;
+  width: 100vw;
   display: flex;
   flex-direction: column;
+  background-size: cover;
+  background-position: center;
 }
 
 /* NAVBAR */
@@ -28,28 +31,29 @@ body, html {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 15px;
   border-bottom: 1px solid var(--border);
   background: #000;
   flex-shrink: 0;
 }
-.logo-container { width: 40px; height: 40px; }
+.logo-container { width: 35px; height: 35px; }
 .minha-logo { width: 100%; height: 100%; object-fit: contain; }
+.terminal-header-title { color: var(--neon); font-size: 0.8rem; letter-spacing: 1px; }
 
-/* MAIN AREA */
+/* MAIN CONTENT */
 .main-content-area {
   flex: 1;
   display: flex;
-  padding: 10px;
-  gap: 12px;
-  min-height: 0;
+  padding: 8px;
+  gap: 8px;
+  min-height: 0; /* Essencial para o flexbox caber na tela */
 }
 
 .side-panel {
-  width: 220px; /* Aumentado para o Swap respirar */
+  width: 210px; /* Largura ideal para não espremer o gráfico */
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
 }
 
@@ -61,33 +65,32 @@ body, html {
   min-width: 0;
 }
 
-/* PANELS */
+/* GLASS PANELS */
 .glass-panel {
   background: var(--panel-bg);
   border: 1px solid var(--border);
-  padding: 12px;
+  padding: 10px;
   border-radius: 2px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.5);
 }
 
 .panel-title { 
-  font-size: 0.7rem; 
+  font-size: 0.65rem; 
   color: var(--neon); 
-  margin-bottom: 10px; 
+  margin-bottom: 8px; 
   border-bottom: 1px solid var(--border);
-  text-transform: uppercase;
 }
 
-/* SWAP ENGINE */
-.swap-divider { text-align: center; color: var(--neon); margin: 5px 0; font-weight: bold; }
-.result-display {
+/* SWAP ENGINE FIX */
+.swap-panel { flex-shrink: 0; }
+.swap-icon-row { text-align: center; color: var(--neon); padding: 2px 0; font-weight: bold; }
+.swap-result {
   background: rgba(173, 255, 47, 0.1);
   border: 1px solid var(--border);
-  padding: 8px;
+  padding: 6px;
   text-align: right;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--neon);
-  margin-bottom: 10px;
+  margin-top: 5px;
 }
 
 /* UI ELEMENTS */
@@ -96,27 +99,27 @@ body, html {
   background: #000;
   border: 1px solid var(--border);
   color: #fff;
-  padding: 8px;
-  margin-bottom: 5px;
-  font-size: 0.75rem;
+  padding: 6px;
+  margin-bottom: 4px;
+  font-size: 0.7rem;
 }
 .ui-btn {
   width: 100%;
-  padding: 10px;
+  padding: 8px;
   background: transparent;
   color: var(--neon);
   border: 1px solid var(--neon);
   cursor: pointer;
+  font-size: 0.65rem;
   font-weight: bold;
-  text-transform: uppercase;
-  font-size: 0.7rem;
 }
-.ui-btn:hover { background: var(--neon); color: #000; }
+.neon-btn { background: rgba(173, 255, 47, 0.05); }
+.neon-btn:hover { background: var(--neon); color: #000; }
 
-/* CHART & TABS */
-.asset-bar { display: flex; gap: 2px; overflow-x: hidden; }
+/* CHART COMPONENTS */
+.asset-bar { display: flex; gap: 2px; overflow: hidden; }
 .tab-normal, .tab-active {
-  flex: 1; padding: 6px; font-size: 0.6rem;
+  flex: 1; padding: 5px 2px; font-size: 0.55rem;
   background: #000; color: #555; border: 1px solid var(--border);
 }
 .tab-active { background: var(--neon); color: #000; font-weight: bold; }
@@ -124,35 +127,36 @@ body, html {
 .chart-container { flex: 1; position: relative; background: #000; }
 
 /* COLLECTIONS Area */
-.collections-area { flex: 1; overflow-y: auto; }
-.nft-grid { font-size: 0.65rem; color: #555; text-align: center; margin-top: 20px; }
+.collections-panel { flex: 1; overflow: hidden; }
+.collections-placeholder { font-size: 0.6rem; color: #444; text-align: center; margin-top: 20px; }
 
 /* MONITOR */
-.monitor-gif { width: 100%; height: 60px; object-fit: contain; }
-.sys-time { font-size: 0.65rem; text-align: center; color: var(--neon); }
+.side-gif { width: 100%; height: 50px; object-fit: contain; }
+.time-display { font-size: 0.6rem; text-align: center; color: var(--neon); margin-top: 4px; }
 
-/* SCANNER BADGE */
+/* GEM BADGE */
 .gem-badge {
-  position: absolute; top: 15px; right: 15px;
+  position: absolute; top: 10px; right: 10px;
   background: rgba(0,0,0,0.9);
   border: 1px solid var(--neon);
-  padding: 6px 12px; font-size: 0.7rem; color: var(--neon);
-  z-index: 10; display: flex; align-items: center; gap: 8px;
+  padding: 4px 8px; font-size: 0.65rem; color: var(--neon);
+  z-index: 10; display: flex; align-items: center; gap: 5px;
   cursor: pointer;
 }
-.dot-blink { width: 8px; height: 8px; background: var(--neon); border-radius: 50%; animation: pulse 1s infinite; }
+.dot-blink { width: 6px; height: 6px; background: var(--neon); border-radius: 50%; animation: pulse 1s infinite; }
 @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-/* FOOTER TICKER */
+/* FOOTER */
 .ticker-footer {
   height: 25px; background: #000; border-top: 1px solid var(--border);
   display: flex; align-items: center; overflow: hidden;
+  flex-shrink: 0;
 }
-.ticker-wrapper { display: flex; animation: scroll 40s linear infinite; }
-.ticker-item { padding: 0 25px; font-size: 0.65rem; white-space: nowrap; border-right: 1px solid #222; }
+.ticker-track { display: flex; animation: scroll 40s linear infinite; }
+.ticker-item { padding: 0 20px; font-size: 0.65rem; white-space: nowrap; }
 @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-/* CRT EFFECT */
+/* CRT */
 .crt-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%), 
